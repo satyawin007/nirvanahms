@@ -965,11 +965,11 @@ Route::any('/addmanufacturer', "masters\ManufacturesController@addManufacturer")
 
 Route::any('/editmanufacturer', "masters\ManufacturesController@editManufacturer");
 
-Route::any('/medicines', "masters\MedicinesController@manageMedicines");
+Route::any('/labtests', "masters\LabTestsController@manageLabTests");
 
-Route::any('/addmedicines', "masters\MedicinesController@addMedicines");
+Route::any('/addlabtests', "masters\LabTestsController@addLabTests");
 
-Route::any('/editmedicines', "masters\MedicinesController@editMedicines");
+Route::any('/editlabtests', "masters\LabTestsController@editLabTests");
 
 Route::get('/inpatients', "registrations\InpatientController@addinpatient");
 
@@ -977,9 +977,15 @@ Route::any('/addinpatient', "registrations\InpatientController@addInpatient");
 
 Route::any('/editinpatient', "registrations\InpatientController@editInpatient");
 
-Route::get('/outpatients', "registrations\OutpatientController@addOutpatients");
+Route::get('/opbilling', "registrations\OutpatientController@addOutpatients");
+
+Route::get('/register', "registrations\OutpatientController@registration");
 
 Route::any('/addoutpatient', "registrations\OutpatientController@addOutpatients");
 
 Route::any('/editoutpatient', "registrations\OutpatientController@editOutpatients");
+
+Route::any('/register1', "registrations\OutpatientController@patientRegister");
+
+Route::any('/billing', "billing\BillingController@billing");
 

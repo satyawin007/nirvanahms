@@ -199,13 +199,11 @@ use Illuminate\Support\Facades\Input;
 					<table id="dynamic-table1" class="table table-striped table-bordered table-hover">
 					<thead>
 						<tr>
-							<th>Item</th>
-							<th>Item Type</th>
-							<th>Item Info</th>
-							<th>Item Numbers</th>
+							<th>Drug</th>
+							<th>Drug Type</th>
+							<th>Drug Info</th>
 							<th>Quantity</th>
 							<th>Price of Unit</th>
-							<th>status</th>
 							<th>Actions</th>
 						</tr>
 					</thead>
@@ -334,7 +332,7 @@ use Illuminate\Support\Facades\Input;
 				
 								<button class="btn btn-sm btn-primary" data-dismiss="modal" onclick="return getFormValues()">
 									<i class="ace-icon fa fa-check"></i>
-									Save
+									Add
 								</button>
 							</div>
 	
@@ -381,12 +379,6 @@ use Illuminate\Support\Facades\Input;
 			isEdit = false;
 			editRowId = -1;
 			function getFormValues(){
-				if(!$("#itemnumbers").attr("readonly")){
-					ckval = $("#itemnumbers").val();
-					if(!validateInput(ckval)){
-						return false;
-					}
-				}
 				tr = [];
 				country = $("#item option:selected").text();
 				tr[0] = country;
@@ -394,18 +386,14 @@ use Illuminate\Support\Facades\Input;
 				tr[1] = itemtype;
 				fname = $("#iteminfo option:selected").text();
 				tr[2] = fname;
-				lname = $("#itemnumbers").val();
-				tr[3] = lname;
 				lname = $("#quantity").val();
-				tr[4] = lname;
+				tr[3] = lname;
 				unitprice = $("#unitprice").val();
-				tr[5] = unitprice;
-				status = $("#status").val();
-				tr[6] = status;
-				tr[7] = '<button class="btn btn-sm btn-primary" onclick="editItem('+row+')">Edit</button>&nbsp;&nbsp;&nbsp;'+'<button class="btn btn-sm btn-danger" onclick="removeItem('+row+')">Remove</button>';
-				tr[8] = $("#item").val();
-				tr[9] = $("#itemtype").val();
-				tr[10] = $("#iteminfo").val();
+				tr[4] = unitprice;
+				tr[5] = '<button class="btn btn-sm btn-primary" onclick="editItem('+row+')">Edit</button>&nbsp;&nbsp;&nbsp;'+'<button class="btn btn-sm btn-danger" onclick="removeItem('+row+')">Remove</button>';
+				tr[6] = $("#item").val();
+				tr[7] = $("#itemtype").val();
+				tr[8] = $("#iteminfo").val();
 				if(country != "" && fname!="" && lname!="" && unitprice!=""){
 					if(isEdit && editRowId>=0){
 						for(i=0; i<row; i++){
@@ -415,12 +403,10 @@ use Illuminate\Support\Facades\Input;
 								tabledata[i][2] = tr[2];
 								tabledata[i][3] = tr[3];
 								tabledata[i][4] = tr[4];
-								tabledata[i][5] = tr[5];
-								tabledata[i][6] = tr[6];
-								tabledata[i][7] = '<button class="btn btn-sm btn-primary" onclick="editItem('+editRowId+')">Edit</button>&nbsp;&nbsp;&nbsp;'+'<button class="btn btn-sm btn-danger" onclick="removeItem('+editRowId+')">Remove</button>';;
-								tabledata[i][8] = $("#item").val();
-								tabledata[i][9] = $("#itemtype").val();
-								tabledata[i][10] = $("#iteminfo").val();
+								tabledata[i][5] = '<button class="btn btn-sm btn-primary" onclick="editItem('+editRowId+')">Edit</button>&nbsp;&nbsp;&nbsp;'+'<button class="btn btn-sm btn-danger" onclick="removeItem('+editRowId+')">Remove</button>';;
+								tabledata[i][6] = $("#item").val();
+								tabledata[i][7] = $("#itemtype").val();
+								tabledata[i][8] = $("#iteminfo").val();
 							}
 						}
 						isEdit = false;
@@ -437,7 +423,6 @@ use Illuminate\Support\Facades\Input;
 					$("#item option").each(function() { this.selected = (this.value == ""); });
 					$("#iteminfo option").each(function() { this.selected = (this.value == ""); });
 					$("#quantity").val("");
-					$("#itemnumbers").val("");
 					$("#itemnumbers").attr("readonly",false);
 					$("#unitprice").val("");
 					$('.chosen-select').trigger('chosen:updated');
@@ -613,10 +598,8 @@ use Illuminate\Support\Facades\Input;
 				editRowId = rowid;
 				for(i=0; i<row; i++){
 					if(editRowId == i){
-						$("#itemnumbers").val(tabledata[i][3]);
-						$("#quantity").val(tabledata[i][4]);				
-						$("#unitprice").val(tabledata[i][5]);
-						$("#status option").each(function() { this.selected = (this.value == tabledata[i][6]); });
+						$("#quantity").val(tabledata[i][3]);				
+						$("#unitprice").val(tabledata[i][4]);
 						$("#item option").each(function() { this.selected = (this.text == tabledata[i][0]); });
 						$("#itemtype option").each(function() { this.selected = (this.text == tabledata[i][1]); });
 						$("#iteminfo option").each(function() { this.selected = (this.text == tabledata[i][2]); });
@@ -635,19 +618,19 @@ use Illuminate\Support\Facades\Input;
 					if(typeof tabledata[i]!== "undefined" && tabledata[i][0] != ""){
 						jsondata = jsondata+"{";
 						tdata = tdata+"<tr>";
-						for(j=0; j<8; j++){	
+						for(j=0; j<6; j++){	
 							tdata = tdata+"<td>"+tabledata[i][j]+"</td>";
-							if(j<6){
+							if(j<4){
 								jsondata = jsondata+"\"i"+j+"\":\""+tabledata[i][j]+"\",";
 							}
-							if(j==6){
+							if(j==4){
 								jsondata = jsondata+"\"i"+j+"\":\""+tabledata[i][j]+"\",";
-								jsondata = jsondata+"\"i"+7+"\":\""+tabledata[i][8]+"\",";
-								jsondata = jsondata+"\"i"+8+"\":\""+tabledata[i][9]+"\",";
-								jsondata = jsondata+"\"i"+9+"\":\""+tabledata[i][10]+"\"";
+								jsondata = jsondata+"\"i"+5+"\":\""+tabledata[i][6]+"\",";
+								jsondata = jsondata+"\"i"+6+"\":\""+tabledata[i][7]+"\",";
+								jsondata = jsondata+"\"i"+7+"\":\""+tabledata[i][8]+"\"";
 							}
 						}
-						totalamt = totalamt+(tabledata[i][4]*tabledata[i][5]);
+						totalamt = totalamt+(tabledata[i][3]*tabledata[i][4]);
 						tdata = tdata+"</tr>";						
 						jsondata = jsondata+"},";
 					}

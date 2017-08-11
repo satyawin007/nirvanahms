@@ -9,7 +9,7 @@ class OutpatientController extends \Controller {
 	 *
 	 * @return Response
 	 */
-	public function addOutpatients()
+	public function registration()
 	{
 		if (\Request::isMethod('post'))
 		{
@@ -65,7 +65,7 @@ class OutpatientController extends \Controller {
 		$form_info["method"] = "post";
 		$form_info["class"] = "form-horizontal";
 		$form_info["back_url"] = "officebranches";
-		$form_info["bredcum"] = "add office branch";
+		$form_info["bredcum"] = "Registration Form";
 		
 		$form_fields = array();
 		
@@ -95,44 +95,49 @@ class OutpatientController extends \Controller {
 // 		}
 		
 		$tabs = array();
-		$form_fields = array();
-		$form_field = array("name"=>"newregistration", "content"=>"Registration", "readonly"=>"",  "required"=>"required", "type"=>"radio", "options"=>array("new_registration"=>"new","existing_registration"=>"already registered"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"previousvisitdoctor", "content"=>"previous visit doctor", "readonly"=>"","required"=>"","type"=>"text", "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"mr_no", "content"=>"MR No", "readonly"=>"",  "required"=>"", "readonly"=>"readonly",  "type"=>"text", "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"medicolegal", "content"=>"Medico Legal Case", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("yes"=>"&nbsp;"),  "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"closepreviousvisit", "content"=>"Close previous Active Visit", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("yes"=>"&nbsp;"),  "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$tab = array();
-		$tab['form_fields'] = $form_fields;
-		$tab['href'] = "tabone";
-		$tab['heading'] = strtoupper("Patient Details");
-		$tabs[] = $tab;
+// 		$form_fields = array();
+// 		$form_field = array("name"=>"mr_no", "content"=>"MR No", "readonly"=>"",  "required"=>"", "readonly"=>"",  "type"=>"text","action"=>array("type"=>"onchange","script"=>"getPatientDetails(this.value)"),  "class"=>"form-control");
+// 		$form_fields[] = $form_field;
+// 		$form_field = array("name"=>"previous_visit_doctor", "content"=>"previous visit doctor", "readonly"=>"","required"=>"","type"=>"text", "class"=>"form-control");
+// 		$form_fields[] = $form_field;
+// 		$form_field = array("name"=>"medicolegal", "content"=>"Medico Legal Case", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("yes"=>"&nbsp;"),  "class"=>"form-control");
+// 		$form_fields[] = $form_field;
+// 		$form_field = array("name"=>"closepreviousvisit", "content"=>"Close previous Active Visit", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("yes"=>"&nbsp;"),  "class"=>"form-control");
+// 		$form_fields[] = $form_field;
+		
+// 		$tab = array();
+// 		$tab['form_fields'] = $form_fields;
+// 		$tab['href'] = "tabone";
+// 		$tab['heading'] = strtoupper("Patient Details");
+// 		$tabs[] = $tab;
 		
 		$form_fields = array();
-		$form_field = array("name"=>"fullname", "content"=>"Full name", "readonly"=>"",  "required"=>"required", "type"=>"text","class"=>"form-control");
+		$form_field = array("name"=>"firstname", "content"=>"first name", "readonly"=>"",  "required"=>"required", "type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"lastname", "content"=>"last name", "readonly"=>"",  "required"=>"required", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"phone", "content"=>"Mobile No", "readonly"=>"",  "required"=>"required", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"age", "content"=>"Age", "readonly"=>"",  "required"=>"required", "type"=>"text","class"=>"form-control");
+		$form_field = array("name"=>"gender",  "content"=>"gender", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MALE"=>"MALE","FEMALE"=>"FEMALE"), "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"gender",  "content"=>"gender", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>array("MALE"=>"MALE","FEMALE"=>"FEMALE"), "class"=>"form-control");
+		$form_field = array("name"=>"dob",  "content"=>"date of birth", "readonly"=>"",  "required"=>"required", "type"=>"text",  "class"=>"form-control date");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"Next_of_kin_name", "content"=>"Next of kin name", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
+		$form_field = array("name"=>"age", "content"=>"Age", "readonly"=>"readonly",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"addtional_phone", "content"=>"Additional phone", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"Relation", "content"=>"Relation", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"relation_phone", "content"=>"relation phone No", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"patient_category", "content"=>"Patient category", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>$bank_arr,  "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"casefile", "content"=>"Case file", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
+// 		$form_field = array("name"=>"Next_of_kin_name", "content"=>"Next of kin name", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
+// 		$form_fields[] = $form_field;
+// 		$form_field = array("name"=>"addtional_phone", "content"=>"Additional phone", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
+// 		$form_fields[] = $form_field;
+// 		$form_field = array("name"=>"Relation", "content"=>"Relation", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
+// 		$form_fields[] = $form_field;
+// 		$form_field = array("name"=>"relation_phone", "content"=>"relation phone No", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
+// 		$form_fields[] = $form_field;
+// 		$form_field = array("name"=>"patient_category", "content"=>"Patient category", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>$bank_arr,  "class"=>"form-control");
+// 		$form_fields[] = $form_field;
+// 		$form_field = array("name"=>"casefile", "content"=>"Case file", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
+// 		$form_fields[] = $form_field;
 		$tab = array();
 		$tab['form_fields'] = $form_fields;
 		$tab['href'] = "tabtwo";
@@ -152,35 +157,15 @@ class OutpatientController extends \Controller {
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"marital_status",  "content"=>"marital status", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"marketing_source",  "content"=>"Marketing Source", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"hospital_visit_type",  "content"=>"Marketing Source", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
-		$form_fields[] = $form_field;
 		$form_field = array("name"=>"bloodgroup",  "content"=>"Blood Group", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"religion",  "content"=>"religion", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"occupation",  "content"=>"occupation", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"patient_origin", "content"=>"patient origin", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"custom_field2", "content"=>"custom field2", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"father_name", "content"=>"father name", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"patient_category_text", "content"=>"patient category", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"patient_Sourcing_category", "content"=>"patient sourcing category", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"uhid", "content"=>"uhid", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"test",  "content"=>"test", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
-		$form_fields[] = $form_field;
 		$form_field = array("name"=>"remarks", "content"=>"remarks", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"email", "content"=>"email id", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"pmore", "content"=>"pmore", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
 		$tab = array();
 		$tab['form_fields'] = $form_fields;
@@ -189,9 +174,7 @@ class OutpatientController extends \Controller {
 		$tabs[] = $tab;
 		
 		$form_fields = array();
-		$form_field = array("name"=>"sponsors1", "content"=>"primary sponsor", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("primary_sponsor"=>"primary sponsor"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"sponsor2", "content"=>"secondary sponsor", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("secondary_sponsor"=>"secondary sponsor"), "class"=>"form-control");
+		$form_field = array("name"=>"billing", "content"=>"Billing Details", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("for_payment"=>"  For payment"), "class"=>"form-control");
 		$form_fields[] = $form_field;
 		
 		$tab = array();
@@ -200,32 +183,17 @@ class OutpatientController extends \Controller {
 		$tab['heading'] = strtoupper("sponsor information");
 		$tabs[] = $tab;
 		
-		$form_fields = array();
-		$form_field = array("name"=>"bill_type", "content"=>"bill type", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"rate_plan", "content"=>"rate plan", "readonly"=>"",  "required"=>"required",  "type"=>"select", "options"=>array("AAROGYARASKHA"=>"AAROGYARASKHA","ESI"=>"ESI","GENERAL"=>"GENERAL","NTRVS"=>"NTRVS","TEST"=>"TEST","VIP"=>"VIP","E.P.D.C.L"=>"E.P.D.C.L","ONGC"=>"ONGC"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		
-		$tab = array();
-		$tab['form_fields'] = $form_fields;
-		$tab['href'] = "tabfive";
-		$tab['heading'] = strtoupper("payment information");
-		$tabs[] = $tab;
 		
 		$form_fields = array();
-		$form_field = array("name"=>"department", "content"=>"department", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
+		$form_field = array("name"=>"consulting_doctor", "content"=>"consulting doctor", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"consulting_doctor", "content"=>"consulting doctor", "readonly"=>"",  "required"=>"required", "type"=>"text","class"=>"form-control");
+		$form_field = array("name"=>"department", "content"=>"department", "readonly"=>"readonly",  "required"=>"required", "type"=>"text",  "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"visit_type", "content"=>"visit type", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"consultation_type", "content"=>"consultation type", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"consultaion_time", "content"=>"consultation time", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control date");
+		$form_field = array("name"=>"consultaion_time", "content"=>"date & time", "value"=>date("d-m-Y h:i A"), "readonly"=>"readonly",  "required"=>"required","type"=>"text", "class"=>"form-control date");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"consultation_remarks", "content"=>"consultation remarks", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"consultaion_fee", "content"=>"consultation fee", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control");
+		$form_field = array("name"=>"consultaion_fee", "content"=>"consultation fee", "readonly"=>"readonly",  "required"=>"","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"referredby", "content"=>"referred by", "readonly"=>"",  "required"=>"required", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
@@ -238,7 +206,7 @@ class OutpatientController extends \Controller {
 		$tab['heading'] = strtoupper("admission information");
 		$tabs[] = $tab;
 		$form_info["tabs"] = $tabs;
-		return View::make("registrations.addtabbedform",array("form_info"=>$form_info));		
+		return View::make("registrations.registrationform",array("form_info"=>$form_info));		
 	}
 	
 	/**
@@ -455,4 +423,108 @@ class OutpatientController extends \Controller {
 		return View::make('registrations.datatable', array("values"=>$values));
 	}
 	
+	public function patientRegister()
+	{
+		if (\Request::isMethod('post'))
+		{
+			//$values["test"];
+			$values = Input::all();
+			$field_names = array("MRNO"=>"MRNO","consulting_doctor"=>"consulting_doctor","fullname"=>"full_name","mobile_number"=>"mobile_number","age"=>"age","gender"=>"gender","visit_type"=>"visit_type","identity_proof_type"=>"identity_proof_type");
+			$fields = array();
+			foreach ($field_names as $key=>$val){
+				if(isset($values[$key])){
+						$fields[$val] = $values[$key];
+				}
+			}
+			if (isset($values["identity_proof"]) && Input::hasFile('identity_proof') && Input::file('identity_proof')->isValid()) {
+				$destinationPath = storage_path().'/uploads/'; // upload path
+				$extension = Input::file('identity_proof')->getClientOriginalExtension(); // getting image extension
+				$fileName = uniqid().'.'.$extension; // renameing image
+				Input::file('identity_proof')->move($destinationPath, $fileName); // upl1oading file to given path
+				$fields["identity_proof"] = $fileName;
+			}
+			$db_functions_ctrl = new DBFunctionsController();
+			$table = "Registration";
+				
+			if($db_functions_ctrl->insert($table, $fields)){
+				\Session::put("message","Operation completed Successfully");
+				return \Redirect::to("register");
+			}
+			else{
+				\Session::put("message","Operation Could not be completed, Try Again!");
+				return \Redirect::to("register");
+			}
+		}
+		$mrno = \Registration::orderBy('id', 'desc')->first();
+		$mrno = $mrno->MRNO;
+		$mrno = "HMS".(substr($mrno, 3)+1);
+		//$fields["empCode"] = $empCode;
+		
+		$form_info = array();
+		$form_info["name"] = "register";
+		$form_info["action"] = "register";
+		$form_info["method"] = "post";
+		$form_info["class"] = "form-horizontal";
+		$form_info["back_url"] = "";
+		$form_info["bredcum"] = "";
+	
+		
+		$doctors =  \Doctors::Where("status","=","ACTIVE")->get();
+		$doctor_arr = array();
+		foreach ($doctors as $doctor){
+			$doctor_arr[$doctor['id']] = $doctor->name;
+		}
+		
+		$proof_arr = array();
+		$proofs =  \LookupTypeValues::Where("name","=","identity proof type")->first();
+		if(count($proofs)>0){
+			$proofs =  \LookupTypeValues::Where("parentId","=",$proofs->id)->get();
+			foreach ($proofs as $proof){
+				$proof_arr[$proof['id']] = $proof->name;
+			}
+		}
+		
+		
+		$form_fields = array();
+		$form_field = array("name"=>"MRNO", "content"=>"MRNO", "readonly"=>"readonly", "value"=>$mrno,"required"=>"","type"=>"text", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"fullname", "content"=>"full name", "readonly"=>"",  "required"=>"required", "type"=>"text", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"mobile_number", "content"=>"mobile number", "readonly"=>"",  "required"=>"required", "type"=>"text", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"age", "content"=>"age", "readonly"=>"",  "required"=>"required", "type"=>"text", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"gender",  "content"=>"gender", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>array("MALE"=>"MALE","FEMALE"=>"FEMALE"), "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"visit_type", "content"=>"visit type", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("free"=>"free","pay"=>"pay"), "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"identity_proof_type", "content"=>"identity proof type", "readonly"=>"",  "required"=>"","type"=>"select", "class"=>"form-control chosen-select","options"=>$proof_arr);
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"consulting_doctor", "content"=>"consulting doctor", "readonly"=>"",  "required"=>"","type"=>"select", "class"=>"form-control chosen-select","options"=>$doctor_arr);
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"identity_proof", "content"=>"identity proof", "readonly"=>"",  "required"=>"", "type"=>"file", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		
+		$form_info["form_fields"] = $form_fields;
+		return View::make("registrations.patientregistration",array("form_info"=>$form_info));
+	}
+	
+	public function getpatientdetails(){
+		$values = Input::all();
+		$doctors =  \Doctors::Where("status","=","ACTIVE")->get();
+		$doctor_arr = array();
+		foreach ($doctors as $doctor){
+			$doctor_arr[$doctor['id']] = $doctor->name;
+		}
+		$entity = \Registration::where("MRNO","=",$values["MRNO"])->first();
+		$json_resp = array();
+		if(count($entity)>0){
+			$json_resp["consulting_doctor"] = $doctor_arr[$entity->consulting_doctor];
+			$json_resp["full_name"] = $entity->full_name;
+			$json_resp["mobile_number"] = $entity->mobile_number;
+			$json_resp["age"] = $entity->age;
+			$json_resp["gender"] = $entity->gender;
+		}
+		echo json_encode($json_resp);
+	}
 }

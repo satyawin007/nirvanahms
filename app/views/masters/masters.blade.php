@@ -55,17 +55,17 @@
 				</button>									
 				</a>
 				<?php } if(in_array(153, $jobs)){?>
-				<a href="manufacturers">
+				<a href="creditsuppliers">
 				<button>
 					<i class="ace-icon fa fa-tag bigger-300"></i><BR/>
-					&nbsp; &nbsp; &nbsp;  MANAFACTURARES &nbsp; &nbsp; &nbsp; 
+					&nbsp; &nbsp; &nbsp;  CREDIT SUPPLIERS &nbsp; &nbsp; &nbsp; 
 				</button>
 				</a>
 				<?php } if(in_array(154, $jobs)){?>
-				<a href="medicines">
+				<a href="labtests">
 				<button>
 					<i class="ace-icon fa fa-map-marker bigger-300"></i><BR/>
-					&nbsp; &nbsp; &nbsp;  MEDICINES &nbsp; &nbsp; &nbsp; 
+					&nbsp; &nbsp; &nbsp;  LAB TESTS &nbsp; &nbsp; &nbsp; 
 				</button>
 				</a>
 				<?php } if(in_array(160, $jobs)){?>

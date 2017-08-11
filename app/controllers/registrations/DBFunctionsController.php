@@ -1,4 +1,4 @@
-<?php namespace billpayments;
+<?php namespace registrations;
 
 class DBFunctionsController extends \Controller {
 

@@ -37,9 +37,6 @@ class PurchaseOrderController extends \Controller {
 					}
 				}
 			}
-// 			if(isset($values["incharge"]) && $values["incharge"]>0){
-// 				DB::statement(DB::raw("CALL update_incharge_amount(".$values["incharge"].", -".$values["totalamount"].");"));
-// 			}
 			if (isset($values["billfile"]) && Input::hasFile('billfile') && Input::file('billfile')->isValid()) {
 				$destinationPath = storage_path().'/uploads/'; // upload path
 				$extension = Input::file('billfile')->getClientOriginalExtension(); // getting image extension
@@ -47,21 +44,12 @@ class PurchaseOrderController extends \Controller {
 				Input::file('billfile')->move($destinationPath, $fileName); // upl1oading file to given path
 				$fields["filePath"] = $fileName;
 			}
-			if(isset($values["stocktype"]) && $values["stocktype"]=="OFFICE"){
-				$fields["type"] = "OFFICE PURCHASE ORDER";
-			}
 			$db_functions_ctrl = new DBFunctionsController();
 			$table = "PurchasedOrders";
 			\DB::beginTransaction();
 			$recid = "";
 			try{
 				$recid = $db_functions_ctrl->insertRetId($table, $fields);
-				if(isset($values["incharge"]) && $values["incharge"]>0){
-					$incharge_acct = \InchargeAccounts::where("empid","=",$values["incharge"])->first();
-					$balance_amount = $incharge_acct->balance;
-					$balance_amount = $balance_amount-$values["totalamount"];
-					\InchargeAccounts::where("empid","=",$values["incharge"])->update(array("balance"=>$balance_amount));
-				}
 			}
 			catch(\Exception $ex){
 				\Session::put("message","Add Purchase order : Operation Could not be completed, Try Again!");
@@ -76,15 +64,12 @@ class PurchaseOrderController extends \Controller {
 				foreach ($jsonitems as $jsonitem){
 					$fields = array();
 					$fields["purchasedOrderId"] = $recid;
-					$fields["itemId"] = $jsonitem->i7;
-					$fields["itemTypeId"] = $jsonitem->i8;
-					$fields["manufacturerId"] = $jsonitem->i9;
-					$fields["itemNumbers"] = $jsonitem->i3;
-					$fields["itemNumbersAll"] = $jsonitem->i3;
-					$fields["qty"] = $jsonitem->i4;
-					$fields["purchasedQty"] = $jsonitem->i4;
-					$fields["unitPrice"] = $jsonitem->i5;
-					$fields["itemStatus"] = $jsonitem->i6;
+					$fields["itemId"] = $jsonitem->i5;
+					$fields["itemTypeId"] = $jsonitem->i6;
+					$fields["manufacturerId"] = $jsonitem->i7;
+					$fields["qty"] = $jsonitem->i3;
+					$fields["purchasedQty"] = $jsonitem->i3;
+					$fields["unitPrice"] = $jsonitem->i4;
 					$db_functions_ctrl->insert($table, $fields);
 				}				
 			}
@@ -400,31 +385,19 @@ class PurchaseOrderController extends \Controller {
 		}
 		
 		
-		$form_field = array("name"=>"warehouse", "content"=>"warehouse", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$warehouse_arr, "action"=>array("type"=>"onChange","script"=>"getCreditSupplierByState(this.value)"), "class"=>"form-control chosen-select");
-		$form_fields[] = $form_field;
 		$form_field = array("name"=>"creditsupplier", "content"=>"credit supplier", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$credit_sup_arr, "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"orderdate", "content"=>"order date", "readonly"=>"", "required"=>"required","type"=>"text","action"=>array("type"=>"onchange","script"=>"getendreading()"),  "class"=>"form-control date-picker");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"receivedby", "content"=>"received by", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$incharges_arr, "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"billnumber", "content"=>"bill number", "readonly"=>"", "action"=>array("type"=>"onChange","script"=>"verifyBillNo(this.value)"), "required"=>"","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"amountpaid", "content"=>"amount paid", "readonly"=>"", "required"=>"required","type"=>"select", "action"=>array("type"=>"onChange","script"=>"enablePaymentType(this.value)"), "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"enableincharge", "content"=>"enable incharge", "readonly"=>"", "required"=>"","type"=>"select", "options"=>array("YES"=>" YES","NO"=>" NO"), "action"=>array("type"=>"onchange","script"=>"enableIncharge(this.value)"), "class"=>"form-control");
-		$form_fields[] = $form_field;
 		$form_field = array("name"=>"paymenttype", "id"=>"paymenttype", "content"=>"payment type", "readonly"=>"", "required"=>"","type"=>"select", "action"=>array("type"=>"onchange","script"=>"showPaymentFields(this.value)"), "options"=>array("cash"=>"CASH","advance"=>"FROM ADVANCE","cheque_debit"=>"CHEQUE (CREDIT)","cheque_credit"=>"CHEQUE (DEBIT)","ecs"=>"ECS","neft"=>"NEFT","rtgs"=>"RTGS","dd"=>"DD","credit_card"=>"CREDIT CARD","debit_card"=>"DEBIT CARD"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"incharge", "content"=>"Incharge name", "readonly"=>"",  "required"=>"", "type"=>"select", "class"=>"form-control chosen-select", "action"=>array("type"=>"onchange", "script"=>"getInchargeBalance(this.value)"),  "options"=>$incharges_arr);
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"paymentdate", "content"=>"payment paid date", "readonly"=>"", "required"=>"", "type"=>"text", "class"=>"form-control date-picker");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"inchargebalance", "value"=>"", "content"=>"Incharge balance", "readonly"=>"readonly",  "required"=>"", "type"=>"text", "class"=>"form-control");
-		$form_fields[] = $form_field;
 		$form_field = array("name"=>"comments", "content"=>"comments", "readonly"=>"", "required"=>"","type"=>"textarea", "class"=>"form-control ");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"suspense", "content"=>"suspense", "readonly"=>"", "required"=>"","type"=>"checkboxslide", "options"=>array("YES"=>" YES","NO"=>" NO"),  "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"billfile", "content"=>"upload bill", "readonly"=>"", "required"=>"", "type"=>"file", "class"=>"form-control file");
 		$form_fields[] = $form_field;
@@ -462,19 +435,15 @@ class PurchaseOrderController extends \Controller {
 		}
 		$item_info_arr = array("1"=>"info1","2"=>"info2");
 		$form_fields = array();
-		$form_field = array("name"=>"item", "content"=>"item", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$items_arr, "action"=>array("type"=>"onchange","script"=>"getManufacturers(this.value)"), "class"=>"form-control chosen-select");
+		$form_field = array("name"=>"item", "content"=>"drug", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$items_arr, "action"=>array("type"=>"onchange","script"=>"getManufacturers(this.value)"), "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"itemtype", "content"=>"item type", "readonly"=>"", "required"=>"","type"=>"select", "options"=>array(),  "class"=>"form-control chosen-select");
+		$form_field = array("name"=>"itemtype", "content"=>"drug type", "readonly"=>"", "required"=>"","type"=>"select", "options"=>array(),  "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"iteminfo", "content"=>"manufacturer", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>array(),  "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"quantity", "content"=>"quantity", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control ");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"itemnumbers", "content"=>"item numbers", "readonly"=>"readonly", "required"=>"","type"=>"textarea", "placeholder"=>"Enter item numbers as comma(,) separated value without any spaces like 24A4,1B35", "action"=>array("type"=>"onchange","script"=>"validateInput(this.value)"), "class"=>"form-control");
-		$form_fields[] = $form_field;
 		$form_field = array("name"=>"unitprice", "content"=>"price of unit", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control ");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"status", "content"=>"status", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>array("New"=>"New","Old"=>"Old"), "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_info["form_fields"] = $form_fields;
 		$modals[] = $form_info;
@@ -742,8 +711,6 @@ class PurchaseOrderController extends \Controller {
 			
 			$form_fields = array();
 			$form_payment_fields= array();
-			$form_field = array("name"=>"warehouse", "id"=>"warehouse", "value"=>$entity->officeBranchId, "content"=>"warehouse", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$warehouse_arr, "action"=>array("type"=>"onChange", "script"=>"getCreditSupplierByState(this.value)"), "class"=>"form-control chosen-select");
-			$form_fields[] = $form_field;
 			if($entity->type == "PURCHASE ORDER" || $entity->type == "TO CREDIT SUPPLIER REPAIR"){
 				$form_field = array("name"=>"creditsupplier", "id"=>"creditsupplier", "value"=>$entity->creditSupplierId, "content"=>"credit supplier", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$credit_sup_arr, "class"=>"form-control chosen-select");
 				$form_fields[] = $form_field;
@@ -763,12 +730,6 @@ class PurchaseOrderController extends \Controller {
 				$form_field = array("name"=>"suspense", "content"=>"suspense", "value"=>$entity->suspense, "readonly"=>"", "required"=>"","type"=>"checkboxslide", "options"=>array("YES"=>" YES","NO"=>" NO"),  "class"=>"form-control");
 				$form_fields[] = $form_field;
 				$form_field = array("name"=>"billfile", "content"=>"upload bill",  "value"=>$entity->filePath, "readonly"=>"", "required"=>"", "type"=>"file", "class"=>"form-control file");
-				$form_fields[] = $form_field;
-				$form_field = array("name"=>"enableincharge", "id"=>"enableincharge", "content"=>"enable incharge", "readonly"=>"", "required"=>"","type"=>"select", "options"=>array("YES"=>" YES","NO"=>" NO"), "action"=>array("type"=>"onchange","script"=>"enableIncharge(this.value)"), "class"=>"form-control");
-				$form_fields[] = $form_field;
-				$form_field = array("name"=>"incharge", "id"=>"incharge", "value"=>$entity->inchargeId, "content"=>"Incharge name", "readonly"=>"",  "required"=>"", "type"=>"select", "class"=>"form-control chosen-select", "action"=>array("type"=>"onchange", "script"=>"getInchargeBalance(this.value)"), "options"=>$incharges_arr);
-				$form_fields[] = $form_field;
-				$form_field = array("name"=>"inchargebalance", "value"=>"", "content"=>"Incharge balance", "readonly"=>"readonly",  "required"=>"", "type"=>"text", "class"=>"form-control");
 				$form_fields[] = $form_field;
 				$form_field = array("name"=>"amountpaid", "id"=>"amountpaid", "value"=>$entity->amountPaid, "content"=>"amount paid", "readonly"=>"", "required"=>"","type"=>"select", "action"=>array("type"=>"onChange","script"=>"enablePaymentType(this.value)"), "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
 				$form_fields[] = $form_field;
@@ -937,11 +898,7 @@ class PurchaseOrderController extends \Controller {
 				$form_fields[] = $form_field;
 				$form_field = array("name"=>"quantity", "content"=>"quantity", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control ");
 				$form_fields[] = $form_field;
-				$form_field = array("name"=>"itemnumbers", "content"=>"item numbers", "readonly"=>"readonly", "required"=>"","type"=>"textarea", "placeholder"=>"Enter item numbers as comma(,) separated value without any spaces like 24A4,1B35", "action"=>array("type"=>"onchange","script"=>"validateInput(this.value)"), "class"=>"form-control chosen-select");
-				$form_fields[] = $form_field;
 				$form_field = array("name"=>"unitprice", "content"=>"price of unit", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control ");
-				$form_fields[] = $form_field;
-				$form_field = array("name"=>"status", "content"=>"status", "readonly"=>"", "required"=>"required", "type"=>"select", "options"=>array("New"=>"New","Old"=>"Old"), "class"=>"form-control chosen-select");
 				$form_fields[] = $form_field;
 				$form_info["form_fields"] = $form_fields;
 				$modals[] = $form_info;
@@ -978,9 +935,9 @@ class PurchaseOrderController extends \Controller {
 		$values['links'] = $links;
 		
 		$values['create_link'] = array("href"=>"createpurchaseorder?stocktype=nonoffice","text"=>"CREATE PURCHASE ORDER");
-		$values['create_link1'] = array("href"=>"createpurchaseorder?stocktype=office","text"=>"CREATE OFFICE PURCHASE ORDER");
+		//$values['create_link1'] = array("href"=>"createpurchaseorder?stocktype=office","text"=>"CREATE OFFICE PURCHASE ORDER");
 		
-		$theads = array('Credit supplier','Warehouse', 'stock type', "Items (qty)", "incharge", "received By", "order date", "pmt date", "bill number", "amount paid", "payment type", "total amount", "comments", "status",  'created by', 'wf status', 'wf updated By', 'wf_remarks', "Actions");
+		$theads = array('Credit supplier', "Items (qty)", "order date", "pmt date", "bill number", "amount paid", "payment type", "total amount", "comments", "status",  'created by',  "Actions");
 		$values["theads"] = $theads;
 	
 		//Code to add modal forms

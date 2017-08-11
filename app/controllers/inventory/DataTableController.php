@@ -285,7 +285,7 @@ class DataTableController extends \Controller {
 						->select($select_args)->limit($length)->offset($start)->get();
 			$total = \Items::count();
 		}
-	
+		
 		$entities = $entities->toArray();
 		foreach($entities as $entity){
 			$mans = "";
@@ -293,13 +293,14 @@ class DataTableController extends \Controller {
 			foreach ($mans_arr as $man){
 				if($man != "") {
 					$man = \Manufacturers::where("id","=",$man)->get();
-					$man = $man[0];
-					$man = $man->name;
-					$mans = $mans.$man.", ";
+					if(count($man)>0){
+						$man = $man[0];
+						$man = $man->name;
+						$mans = $mans.$man.", ";
+					}
 				}
 			}
 			$entity["manufactures"] = $mans;
-			
 			$itemtypes = "";
 			$itemtypes_arr = explode(",",$entity["itemTypeId"]);
 			foreach ($itemtypes_arr as $itemtype){
@@ -406,11 +407,7 @@ class DataTableController extends \Controller {
 		$data = array();
 		$select_args = array();
 		$select_args[] = "creditsuppliers.suppliername as creditSupplierId";
-		$select_args[] = "officebranch.name as officeBranchId";
-		$select_args[] = "purchase_orders.type as stocktype";
 		$select_args[] = "purchase_orders.type as items";
-		$select_args[] = "employee4.fullName as incharge";
-		$select_args[] = "employee.fullName as receivedBy";
 		$select_args[] = "purchase_orders.orderDate as orderDate";
 		$select_args[] = "purchase_orders.paymentDate as paymentDate";
 		$select_args[] = "purchase_orders.billNumber as billNumber";
@@ -420,9 +417,7 @@ class DataTableController extends \Controller {
 		$select_args[] = "purchase_orders.comments as comments";
 		$select_args[] = "purchase_orders.status as status";
 		$select_args[] = "employee2.fullName as createdBy";
-		$select_args[] = "purchase_orders.workFlowStatus as workFlowStatus";
 		$select_args[] = "employee3.fullName as updatedBy";
-		$select_args[] = "purchase_orders.workFlowRemarks as workFlowRemarks";
 		$select_args[] = "purchase_orders.id as id";
 		$select_args[] = "purchase_orders.filePath as filePath";
 		$actions = array();
@@ -438,19 +433,9 @@ class DataTableController extends \Controller {
 		$search = $_REQUEST["search"];
 		$search = $search['value'];
 		$ass_off_branches = array();
-		if(\Auth::user()->officeBranchIds == ""){
-			$off_brs = \OfficeBranch::All();
-			foreach($off_brs as $off_br){
-				$ass_off_branches[] = $off_br->id;
-			}
-		}
-		else{
-			$ass_off_branches = explode(",", \Auth::user()->officeBranchIds);
-		}
 		if($search != ""){
 			$entities = \PurchasedOrders::whereRaw(" (creditsuppliers.supplierName like '%".$search."%' or billNumber like '%".$search."%') ")
 						->whereIn("purchase_orders.type",array("PURCHASE ORDER","OFFICE PURCHASE ORDER"))
-						->whereIn("purchase_orders.officeBranchId",$ass_off_branches)						
 						->leftjoin("officebranch","officebranch.id","=","purchase_orders.officeBranchId")
 						->leftjoin("creditsuppliers","creditsuppliers.id","=","purchase_orders.creditSupplierId")
 						->leftjoin("employee","employee.id","=","purchase_orders.receivedBy")
@@ -465,7 +450,6 @@ class DataTableController extends \Controller {
 		else{
 			$entities = \PurchasedOrders::where("purchase_orders.status","ACTIVE")
 						->whereIn("purchase_orders.type",array("PURCHASE ORDER","OFFICE PURCHASE ORDER"))
-						->whereIn("purchase_orders.officeBranchId",$ass_off_branches)						
 						->leftjoin("officebranch","officebranch.id","=","purchase_orders.officeBranchId")
 						->leftjoin("creditsuppliers","creditsuppliers.id","=","purchase_orders.creditSupplierId")
 						->leftjoin("employee","employee.id","=","purchase_orders.receivedBy")
@@ -474,7 +458,6 @@ class DataTableController extends \Controller {
 						->leftjoin("employee as employee4", "employee4.id","=","purchase_orders.inchargeId")
 						->select($select_args)->limit($length)->offset($start)->get();
 			$total = \PurchasedOrders::where("purchase_orders.status","ACTIVE")
-						->whereIn("purchase_orders.officeBranchId",$ass_off_branches)			
 						->whereIn("purchase_orders.type",array("PURCHASE ORDER","OFFICE PURCHASE ORDER"))->count();
 		}
 	
@@ -498,12 +481,6 @@ class DataTableController extends \Controller {
 				
 			}
 			
-			if($entity["stocktype"] == "OFFICE PURCHASE ORDER"){
-				$entity["stocktype"] = "OFFICE STOCK";
-			}
-			else{
-				$entity["stocktype"] = "NON OFFICE STOCK";
-			}
 			$entity["orderDate"] = date("d-m-Y",strtotime($entity["orderDate"]));
 			$pmtdate = date("d-m-Y",strtotime($entity["paymentDate"]));
 			if($pmtdate=="00-00-0000" || $pmtdate=="01-01-1970" || $pmtdate=="30-11--0001"){
@@ -529,16 +506,13 @@ class DataTableController extends \Controller {
 				}
 				else {
 					$action['url'] = "editpurchaseorder?stocktype=nonoffice";
-					if($entity["stocktype"] == "OFFICE STOCK"){
-						$action['url'] = "editpurchaseorder?stocktype=office";
-					}
 					$action_data = $action_data."<a class='btn btn-minier btn-".$action["css"]."' href='".$action['url']."&id=".$entity['id']."'>".strtoupper($action["text"])."</a>&nbsp; &nbsp;" ;
 				}
 			}
 			if(isset($entity["workFlowStatus"]) && $entity["workFlowStatus"]=="Approved"){
 				$action_data = "";
 			}
-			$data_values[18] = $action_data;
+			$data_values[11] = $action_data;
 			$data[] = $data_values;
 		}
 		return array("total"=>$total, "data"=>$data);

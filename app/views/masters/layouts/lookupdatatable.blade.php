@@ -60,7 +60,7 @@
 						($form_info['action']=="addrole" && in_array(243, $jobs))||
 						($form_info['action']=="addupload" && in_array(243, $jobs))||
 						($form_info['action']=="addmanufacturer" && in_array(243, $jobs))||
-						($form_info['action']=="addmedicines" && in_array(243, $jobs))||
+						($form_info['action']=="addlabtests" && in_array(243, $jobs))||
 						($form_info['action']=="adddoctors" && in_array(243, $jobs))
 					  ){ ?>
 					@include("masters.layouts.addlookupform",$form_info)
@@ -366,12 +366,12 @@
 				$("#status1 option").each(function() { this.selected = (this.text == status); });
 				$("#id1").val(id);		
 			}
-			function modalEditMedicines(id, name,generic_name,manfacturer_id,description, status){
+			function modalEditMedicines(id, name,code,amount,description, status){
 				$("#name1").val(name);	
-				$("#generic_name1").val(generic_name);			
+				$("#code1").val(code);		
+				$("#amount1").val(amount);			
 				$("#description1").val(description);
 				$("#status1 option").each(function() { this.selected = (this.text == status); });
-				$("#manfacturer_id1 option").each(function() { this.selected = (this.text == manfacturer_id); });
 				$("#id1").val(id);		
 			}
 

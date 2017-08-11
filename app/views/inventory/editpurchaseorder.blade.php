@@ -277,13 +277,11 @@ use Illuminate\Support\Facades\Input;
 					<table id="dynamic-table1" class="table table-striped table-bordered table-hover">
 					<thead>
 						<tr>
-							<th>Item</th>
-							<th>Item Type</th>
-							<th>Item Info</th>
-							<th>Item Numbers</th>
+							<th>Drug</th>
+							<th>Drug Type</th>
+							<th>Drug Info</th>
 							<th>Quantity</th>
 							<th>Price of Unit</th>
-							<th>status</th>
 							<th>Entity Id</th>
 							<th>Actions</th>
 						</tr>
@@ -483,7 +481,7 @@ use Illuminate\Support\Facades\Input;
 				$i = -1;
 				foreach ($entities as $entity){
 					$i++;
-					$table_data = $table_data."['".$entity->item."', '".$entity->itemtype."', '".$entity->manufacturer."', '".$entity->itemNumbers."', '".$entity->qty."', '".$entity->unitPrice."', '".$entity->itemStatus."', '".$entity->id."', ";
+					$table_data = $table_data."['".$entity->item."', '".$entity->itemtype."', '".$entity->manufacturer."', '".$entity->qty."', '".$entity->unitPrice."', '".$entity->id."', ";
 					$table_data = $table_data.'\'<button class="btn btn-sm btn-primary" onclick="editItem('.($i).')">Edit</button>&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-danger" onclick="removeItem('.($i).')">Remove</button>\', \''.$entity->itemId."', '".$entity->itemTypeId."', '".$entity->manufacturerId."'],";    
 				}
 				$table_data = $table_data."]; ";
@@ -506,18 +504,14 @@ use Illuminate\Support\Facades\Input;
 				tr[1] = itemtype;
 				fname = $("#iteminfo option:selected").text();
 				tr[2] = fname;
-				lname = $("#itemnumbers").val();
-				tr[3] = lname;
 				lname = $("#quantity").val();
-				tr[4] = lname;
+				tr[3] = lname;
 				unitprice = $("#unitprice").val();
-				tr[5] = unitprice;
-				status = $("#status").val();
-				tr[6] = status;
-				tr[8] = '<button class="btn btn-sm btn-primary" onclick="editItem('+row+')">Edit</button>&nbsp;&nbsp;&nbsp;'+'<button class="btn btn-sm btn-danger" onclick="removeItem('+row+')">Remove</button>';
-				tr[9] = $("#item").val();
-				tr[10] = $("#itemtype").val();
-				tr[11] = $("#iteminfo").val();
+				tr[4] = unitprice;
+				tr[6] = '<button class="btn btn-sm btn-primary" onclick="editItem('+row+')">Edit</button>&nbsp;&nbsp;&nbsp;'+'<button class="btn btn-sm btn-danger" onclick="removeItem('+row+')">Remove</button>';
+				tr[7] = $("#item").val();
+				tr[8] = $("#itemtype").val();
+				tr[9] = $("#iteminfo").val();
 				if(country != "" && fname!="" && lname!="" && unitprice!=""){
 					if(isEdit && editRowId>=0){
 						for(i=0; i<row; i++){
@@ -527,12 +521,10 @@ use Illuminate\Support\Facades\Input;
 								tabledata[i][2] = tr[2];
 								tabledata[i][3] = tr[3];
 								tabledata[i][4] = tr[4];
-								tabledata[i][5] = tr[5];
-								tabledata[i][6] = tr[6];
-								tabledata[i][8] = '<button class="btn btn-sm btn-primary" onclick="editItem('+editRowId+')">Edit</button>&nbsp;&nbsp;&nbsp;'+'<button class="btn btn-sm btn-danger" onclick="removeItem('+editRowId+')">Remove</button>';;
-								tabledata[i][9] = $("#item").val();
-								tabledata[i][10] = $("#itemtype").val();
-								tabledata[i][11] = $("#iteminfo").val();
+								tabledata[i][6] = '<button class="btn btn-sm btn-primary" onclick="editItem('+editRowId+')">Edit</button>&nbsp;&nbsp;&nbsp;'+'<button class="btn btn-sm btn-danger" onclick="removeItem('+editRowId+')">Remove</button>';;
+								tabledata[i][7] = $("#item").val();
+								tabledata[i][8] = $("#itemtype").val();
+								tabledata[i][9] = $("#iteminfo").val();
 							}
 						}
 						isEdit = false;
@@ -544,13 +536,10 @@ use Illuminate\Support\Facades\Input;
 						row++;
 						drawTable();
 					}
-					$("#status option").each(function() { this.selected = (this.value == ""); });
 					$("#item option").each(function() { this.selected = (this.value == ""); });
 					$("#itemtype option").each(function() { this.selected = (this.value == ""); });
 					$("#iteminfo option").each(function() { this.selected = (this.value == ""); });
 					$("#quantity").val("");
-					$("#itemnumbers").val("");
-					$("#itemnumbers").attr("readonly",false);
 					$("#unitprice").val("");
 					$('.chosen-select').trigger('chosen:updated');
 				}
@@ -675,11 +664,10 @@ use Illuminate\Support\Facades\Input;
 				editRowId = rowid;
 				for(i=0; i<row; i++){
 					if(editRowId == i){
-						getManufacturers(tabledata[i][9]);
+						getManufacturers(tabledata[i][7]);
 						$("#itemnumbers").val(tabledata[i][3]);
-						$("#quantity").val(tabledata[i][4]);				
-						$("#unitprice").val(tabledata[i][5]);
-						$("#status option").each(function() { this.selected = (this.text == tabledata[i][6]); });
+						$("#quantity").val(tabledata[i][3]);				
+						$("#unitprice").val(tabledata[i][4]);
 						$("#item option").each(function() {this.text.trim(); tempele = tabledata[i][0].trim();   this.selected = (this.text == tempele)});
 						$("#itemtype option").each(function() {this.text.trim(); tempele = tabledata[i][1].trim();  this.selected = (this.text == tabledata[i][1]); });
 						$("#iteminfo option").each(function() { this.text.trim(); tempele = tabledata[i][2].trim();  this.selected = (this.text == tabledata[i][2]); });
@@ -708,19 +696,19 @@ use Illuminate\Support\Facades\Input;
 					if(tabledata[i][0] != ""){
 						jsondata = jsondata+"{";
 						tdata = tdata+"<tr>";
-						for(j=0; j<9; j++){	
+						for(j=0; j<7; j++){	
 							tdata = tdata+"<td>"+tabledata[i][j]+"</td>";
-							if(j<7){
+							if(j<5){
 								jsondata = jsondata+"\"i"+j+"\":\""+tabledata[i][j]+"\",";
 							}
-							if(j==7){
+							if(j==5){
 								jsondata = jsondata+"\"i"+j+"\":\""+tabledata[i][j]+"\",";
-								jsondata = jsondata+"\"i"+8+"\":\""+tabledata[i][9]+"\",";
-								jsondata = jsondata+"\"i"+9+"\":\""+tabledata[i][10]+"\",";
-								jsondata = jsondata+"\"i"+10+"\":\""+tabledata[i][11]+"\"";
+								jsondata = jsondata+"\"i"+6+"\":\""+tabledata[i][7]+"\",";
+								jsondata = jsondata+"\"i"+7+"\":\""+tabledata[i][8]+"\",";
+								jsondata = jsondata+"\"i"+8+"\":\""+tabledata[i][9]+"\"";
 							}
 						}
-						totalamt = totalamt+(tabledata[i][4]*tabledata[i][5]);
+						totalamt = totalamt+(tabledata[i][3]*tabledata[i][4]);
 						tdata = tdata+"</tr>";
 						if((i+1)==row){
 							jsondata = jsondata+"}";

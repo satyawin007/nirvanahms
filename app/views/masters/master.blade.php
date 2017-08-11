@@ -308,16 +308,47 @@
 						<ul class="submenu">
 							<?php if(in_array(105, $jobs)){?>
 							<li class="hover">
+								<a href="register">
+									<i class="menu-icon fa fa-caret-right"></i>
+									REGISTRATION
+								</a>
+							</li>
+							<?php } if(in_array(106, $jobs)){?>
+							<li class="hover">
 								<a href="inpatients">
 									<i class="menu-icon fa fa-caret-right"></i>
-									IN PATIENT REGISTRATIONS
+									ADMISSIONS
+								</a>
+							</li>
+							<?php } ?>
+							
+						</ul>
+					</li>
+					
+					<li class="hover">
+						<?php if(in_array(2, $jobs)){?>
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon fa fa-print"></i>
+							<span class="menu-text">
+								BILLING
+							</span>
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+						<?php }?>
+						<b class="arrow"></b>
+						<ul class="submenu">
+							<?php if(in_array(105, $jobs)){?>
+							<li class="hover">
+								<a href="billing?type=diagnostics">
+									<i class="menu-icon fa fa-caret-right"></i>
+									OP BILLING
 								</a>
 							</li>
 							<?php } if(in_array(106, $jobs)){?>
 							<li class="hover">
 								<a href="outpatients">
 									<i class="menu-icon fa fa-caret-right"></i>
-									OUT PATIENT REGISTRATIONS
+									IP BILLING
 								</a>
 							</li>
 							<?php } ?>
@@ -330,7 +361,7 @@
 						<a href="#" class="dropdown-toggle">
 							<i class="menu-icon fa fa-list-alt"></i>
 							<span class="menu-text">
-								STOCK & INVENTORY &nbsp;
+								PHARMACY &nbsp;
 							</span>
 							<b class="arrow fa fa-angle-down"></b>
 						</a>
@@ -363,14 +394,14 @@
 							<li class="hover">
 								<a href="itemtypes">
 									<i class="menu-icon fa fa-caret-right"></i>
-									ITEM TYPES
+									DRUG TYPES
 								</a>
 							</li>
 							<?php } if(in_array(119, $jobs)){?>
 							<li class="hover">
 								<a href="items">
 									<i class="menu-icon fa fa-caret-right"></i>
-									ITEMS
+									DRUGS
 								</a>
 							</li>
 							<?php } if(in_array(120, $jobs)){?>
@@ -378,13 +409,6 @@
 								<a href="purchaseorder">
 									<i class="menu-icon fa fa-caret-right"></i>
 									PURCHASE ORDERS
-								</a>
-							</li>
-							<?php } if(in_array(121, $jobs)){?>
-							<li class="hover">
-								<a href="useitems">
-									<i class="menu-icon fa fa-caret-right"></i>
-									USE STOCK ITEMS
 								</a>
 							</li>
 							<?php }?>

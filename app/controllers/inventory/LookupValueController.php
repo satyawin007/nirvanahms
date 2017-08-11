@@ -164,7 +164,7 @@ class LookupValueController extends \Controller {
 		$form_info["method"] = "post";
 		$form_info["class"] = "form-horizontal";
 		$form_info["back_url"] = "#";
-		$form_info["bredcum"] = "add inventory lookup value";
+		$form_info["bredcum"] = "add drugs lookup value";
 		$form_info["addlink"] = "addparent";
 		
 		$form_fields = array();

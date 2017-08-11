@@ -95,12 +95,7 @@ class CreditSupplierController extends \Controller {
 				$type_arr [$type['id']] = $type->name;
 			}
 			
-			$banks =  \BankDetails::where("bankdetails.status", "=", "ACTIVE")->join("lookuptypevalues","lookuptypevalues.id","=","bankdetails.bankName")->select("bankdetails.id as id", "bankdetails.accountNo as accountNo", "lookuptypevalues.name as name")->get();
 			$banks_arr = array();
-			foreach ($banks as $bank){
-				$banks_arr [$bank['id']] = $bank->name." - ".$bank->accountNo;
-			}
-			
 			$states =  \State::Where("status","=","ACTIVE")->get();
 			$state_arr = array();
 			foreach ($states as $state){
@@ -125,14 +120,6 @@ class CreditSupplierController extends \Controller {
 			$form_fields[] = $form_field;
 			$form_field = array("name"=>"cityname", "id"=>"cityname", "value"=>$entity->cityId, "content"=>"city name", "readonly"=>"",  "required"=>"required","type"=>"select", "options"=>$cities_arr, "class"=>"form-control");
 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"paymenttype", "id"=>"paymenttype", "value"=>$entity->paymentType, "content"=>"payment type", "readonly"=>"",  "action"=>array("type"=>"onchange","script"=>"showPaymentFields(this.value)"), "required"=>"required", "type"=>"select", "class"=>"form-control select2",  "options"=>array("cash"=>"CASH","advance"=>"FROM ADVANCE","cheque_debit"=>"CHEQUE (CREDIT)","cheque_credit"=>"CHEQUE (DEBIT)","ecs"=>"ECS","neft"=>"NEFT","rtgs"=>"RTGS","dd"=>"DD","credit_card"=>"CREDIT CARD","debit_card"=>"DEBIT CARD"));
-			$form_fields[] = $form_field;
-// 			$form_field = array("name"=>"bankaccount", "id"=>"bankaccount","value"=>$entity->bankAccount, "content"=>"bank account", "readonly"=>"",  "required"=>"required", "type"=>"select", "class"=>"form-control", "options"=>$banks_arr);
-// 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"balanceamount", "id"=>"balanceamount", "value"=>$entity->balanceAmount, "content"=>"balance amount", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control number");
-			$form_fields[] = $form_field;
-// 			$form_field = array("name"=>"paymentexpectedday", "id"=>"paymentexpectedday", "value"=>$entity->paymentExpectedDay, "content"=>"payment expected day", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control");
-// 			$form_fields[] = $form_field;
 			$form_field = array("name"=>"status", "id"=>"status", "value"=>$entity->status, "content"=>"status", "readonly"=>"",  "required"=>"","type"=>"select", "options"=>array("ACTIVE"=>"ACTIVE", "INACTIVE"=>"INACTIVE"), "class"=>"form-control");
 			$form_fields[] = $form_field;
 			
@@ -155,7 +142,7 @@ class CreditSupplierController extends \Controller {
 		$values['form_action'] = 'creditsuppliers';
 		$values['action_val'] = '';
 		
-		$theads = array('Supplier Name','Contact Person', "Contact No", "City", "Balance Amount", "Payment Type", "Bank Account", "Payment Expected Day", "status", "Actions");
+		$theads = array('Supplier Name','Contact Person', "Contact No", "City",  "status", "Actions");
 		$values["theads"] = $theads;
 			
 		$form_info = array();
@@ -186,11 +173,6 @@ class CreditSupplierController extends \Controller {
 			$type_arr [$type['name']] = $type->name;
 		}
 		
-		$banks =  \BankDetails::where("bankdetails.status", "=", "ACTIVE")->join("lookuptypevalues","lookuptypevalues.id","=","bankdetails.bankName")->select("bankdetails.id as id", "bankdetails.accountNo as accountNo", "lookuptypevalues.name as name")->get();
-		$banks_arr = array();
-		foreach ($banks as $bank){
-			$banks_arr [$bank['id']] = $bank->name." - ".$bank->accountNo;
-		}
 		
 		$form_field = array("name"=>"statename", "content"=>"state name", "readonly"=>"",  "required"=>"required", "action"=>array("type"=>"onChange", "script"=>"changeState(this.value);"),  "type"=>"select", "class"=>"form-control chosen-select", "options"=>$state_arr);
 		$form_fields[] = $form_field;
@@ -204,12 +186,8 @@ class CreditSupplierController extends \Controller {
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"fulladdress", "content"=>"full address", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"paymenttype", "id"=>"paymenttype",  "content"=>"payment type", "readonly"=>"",   "required"=>"required", "type"=>"select", "class"=>"form-control select2",  "options"=>array("cash"=>"CASH","advance"=>"FROM ADVANCE","cheque_debit"=>"CHEQUE (CREDIT)","cheque_credit"=>"CHEQUE (DEBIT)","ecs"=>"ECS","neft"=>"NEFT","rtgs"=>"RTGS","dd"=>"DD","credit_card"=>"CREDIT CARD","debit_card"=>"DEBIT CARD"));
-		$form_fields[] = $form_field;
 // 		$form_field = array("name"=>"bankaccount", "content"=>"bank account", "readonly"=>"",  "required"=>"required", "type"=>"select", "class"=>"form-control chosen-select", "options"=>$banks_arr);
 // 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"balanceamount", "content"=>"balance amount", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control number");
-		$form_fields[] = $form_field;
 // 		$form_field = array("name"=>"paymentexpectedday", "content"=>"payment expected day", "readonly"=>"",  "required"=>"","type"=>"text", "class"=>"form-control");
 // 		$form_fields[] = $form_field;
 		

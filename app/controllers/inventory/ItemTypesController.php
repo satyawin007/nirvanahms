@@ -94,7 +94,7 @@ class ItemTypesController extends \Controller {
 		$form_info["method"] = "post";
 		$form_info["class"] = "form-horizontal";
 		$form_info["back_url"] = "itemtypes";
-		$form_info["bredcum"] = "add item type";
+		$form_info["bredcum"] = "add drug type";
 		
 		$item_cat_arr = array();
 		$item_cats = \ItemCategories::all();
@@ -105,7 +105,7 @@ class ItemTypesController extends \Controller {
 		$form_fields = array();		
 // 		$form_field = array("name"=>"itemcategory", "content"=>"item name", "readonly"=>"",  "required"=>"required","type"=>"select", "options"=>$item_cat_arr, "class"=>"form-control chosen-select");
 // 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"name", "content"=>"item type name", "readonly"=>"","action"=>array("type"=>"onchange","script"=>"checkvalidation(this.value,this.id,'ItemTypes')"),  "required"=>"required","type"=>"text", "class"=>"form-control");
+		$form_field = array("name"=>"name", "content"=>"drug type name", "readonly"=>"","action"=>array("type"=>"onchange","script"=>"checkvalidation(this.value,this.id,'ItemTypes')"),  "required"=>"required","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"description", "content"=>"description", "readonly"=>"",  "required"=>"","type"=>"textarea", "class"=>"form-control");
 		$form_fields[] = $form_field;
@@ -120,11 +120,11 @@ class ItemTypesController extends \Controller {
 		$form_info["method"] = "post";
 		$form_info["class"] = "form-horizontal";
 		$form_info["back_url"] = "itemtypes";
-		$form_info["bredcum"] = "add item type";
+		$form_info["bredcum"] = "add drug type";
 		
 		$modals = array();
 		$form_fields = array();
-		$form_field = array("name"=>"name1", "content"=>"item type name", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control");
+		$form_field = array("name"=>"name1", "content"=>"drug type name", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
 // 		$form_field = array("name"=>"itemcategory1", "content"=>"item name", "readonly"=>"",  "required"=>"required","type"=>"select", "options"=>$item_cat_arr, "class"=>"form-control chosen-select");
 // 		$form_fields[] = $form_field;

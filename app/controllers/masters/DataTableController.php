@@ -57,8 +57,8 @@ class DataTableController extends \Controller {
 			$data = $ret_arr["data"];
 		}
 		
-		else if(isset($values["name"]) && $values["name"]=="bankdetails") {
-			$ret_arr = $this->getBankDetails($values, $length, $start);
+		else if(isset($values["name"]) && $values["name"]=="labtests") {
+			$ret_arr = $this->getLabTests($values, $length, $start);
 			$total = $ret_arr["total"];
 			$data = $ret_arr["data"];
 		}
@@ -67,8 +67,8 @@ class DataTableController extends \Controller {
 			$total = $ret_arr["total"];
 			$data = $ret_arr["data"];
 		}
-		else if(isset($values["name"]) && $values["name"]=="financecompanies") {
-			$ret_arr = $this->getFinanceCompanies($values, $length, $start);
+		else if(isset($values["name"]) && $values["name"]=="creditsuppliers") {
+			$ret_arr = $this->getCreditSuppliers($values, $length, $start);
 			$total = $ret_arr["total"];
 			$data = $ret_arr["data"];
 		}
@@ -134,10 +134,6 @@ class DataTableController extends \Controller {
 		$select_args[] = "employee.id as id";
 		$select_args[] = "employee.officeBranchId as officeBranchId";
 		$select_args[] = "employee.updated_at as updated_at";
-		
-		
-		
-			
 		$actions = array();
 		if(in_array(202, $this->jobs)){
 			$action = array("url"=>"editsalarydetails?","css"=>"success", "type"=>"", "text"=>"salary Add/Edit");
@@ -1291,7 +1287,7 @@ class DataTableController extends \Controller {
 	private function getCreditSuppliers($values, $length, $start){
 		$total = 0;
 		$data = array();
-	
+		
 		$actions = array();
 		if(in_array(232, $this->jobs)){
 			$action = array("url"=>"editcreditsupplier?","css"=>"primary", "type"=>"", "text"=>"Edit");
@@ -1304,10 +1300,6 @@ class DataTableController extends \Controller {
 		$select_args[] = "creditsuppliers.contactPerson as contactPerson";
 		$select_args[] = "creditsuppliers.contactPhoneNo as contactPhoneNo";
 		$select_args[] = "cities.name as cityId";
-		$select_args[] = "creditsuppliers.balanceAmount as balanceAmount";
-		$select_args[] = "creditsuppliers.paymentType as paymentType";
-		$select_args[] = "creditsuppliers.bankAccount as bankAccount";
-		$select_args[] = "creditsuppliers.paymentExpectedDay as paymentExpectedDay";
 		$select_args[] = "creditsuppliers.status as status";
 		$select_args[] = "creditsuppliers.id as id";
 				
@@ -1325,14 +1317,7 @@ class DataTableController extends \Controller {
 			$total = \CreditSupplier::where("supplierName", "like", "%$search%")->count();
 		}
 		else{
-			$entities = \CreditSupplier::join("cities","cities.id","=","creditsuppliers.cityId")->select($select_args)->limit($length)->offset($start)->get();
-			foreach ($entities as $entity){
-				$bank =  \BankDetails::where("bankdetails.id", "=", $entity->bankAccount)->join("lookuptypevalues","lookuptypevalues.id","=","bankdetails.bankName")->select("bankdetails.id as id", "bankdetails.accountNo as accountNo", "lookuptypevalues.name as name")->get();
-				if(count($bank)>0){
-					$bank = $bank[0];
-					$entity->bankAccount = $bank->name." - ".$bank->accountNo;
-				}
-			}
+			$entities = \CreditSupplier::leftjoin("cities","cities.id","=","creditsuppliers.cityId")->select($select_args)->limit($length)->offset($start)->get();
 			$total = \CreditSupplier::count();;
 		}
 		$entities = $entities->toArray();
@@ -1355,7 +1340,7 @@ class DataTableController extends \Controller {
 					$action_data = $action_data."<a class='btn btn-minier btn-".$action["css"]."' href='".$action['url']."&id=".$entity['id']."'>".strtoupper($action["text"])."</a>&nbsp; &nbsp;" ;
 				}
 			}
-			$data_values[9] = $action_data;
+			$data_values[5] = $action_data;
 			$data[] = $data_values;
 		}
 		return array("total"=>$total, "data"=>$data);
@@ -1931,42 +1916,37 @@ class DataTableController extends \Controller {
 		}
 		return array("total"=>$total, "data"=>$data);
 	}
-	private function getMedicines($values, $length, $start){
+	
+	private function getLabTests($values, $length, $start){
 		$total = 0;
 		$data = array();
 		$select_args = array();
-		$select_args[] = "medicines.id as id";
-		$select_args[] = "medicines.name as name";
-		$select_args[] = "medicines.generic_name as generic_name";
-		$select_args[] = "medicines.manafacturer_id as manafacturer_id";
-		$select_args[] = "medicines.description as description";
-		$select_args[] = "medicines.status as status";
+		$select_args[] = "lab_tests.id as id";
+		$select_args[] = "lab_tests.name as name";
+		$select_args[] = "lab_tests.code as code";
+		$select_args[] = "lab_tests.description as description";
+		$select_args[] = "lab_tests.amount as amount";
+		$select_args[] = "lab_tests.status as status";
 		//$select_args[] = "medicines.id as id";
 	
 		$actions = array();
 		if(in_array(323, $this->jobs)){
-			$action = array("url"=>"#edit", "type"=>"modal", "css"=>"primary", "js"=>"modalEditMedicines(", "jsdata"=>array("id","name","generic_name","manafacturer_id", "description","status"), "text"=>"EDIT");
+			$action = array("url"=>"#edit", "type"=>"modal", "css"=>"primary", "js"=>"modalEditMedicines(", "jsdata"=>array("id","name","code","amount", "description","status"), "text"=>"EDIT");
 			$actions[] = $action;
 		}
 		$values["actions"] = $actions;
 		$search = $_REQUEST["search"];
 		$search = $search['value'];
 		if($search != ""){
-			$entities = \Medicines::where("name", "like", "%$search%")->select($select_args)->limit($length)->offset($start)->get();
-			$total = \Medicines::where("name", "like", "%$search%")->count();
+			$entities = \LabTests::where("name", "like", "%$search%")->select($select_args)->limit($length)->offset($start)->get();
+			$total = \LabTests::where("name", "like", "%$search%")->count();
 		}
 		else{
-			$entities = \Medicines::where("id",">",0)->select($select_args)->limit($length)->offset($start)->get();
-			$total =\Medicines::where("id",">",0)->count();;
-		}
-		$manafacturers =  \Manufacturers::Where("status","=","ACTIVE")->get();
-		$manafacturers_arr = array();
-		foreach ($manafacturers as $manafacturer){
-			$manafacturers_arr[$manafacturer['id']] = $manafacturer['name'];
+			$entities = \LabTests::where("status","=","ACTIVE")->select($select_args)->limit($length)->offset($start)->get();
+			$total =\LabTests::where("status","=","ACTIVE")->count();;
 		}
 		$entities = $entities->toArray();
 		foreach($entities as $entity){
-			$entity["manafacturer_id"]= $manafacturers_arr[$entity["manafacturer_id"]];
 			$data_values = array_values($entity);
 			$actions = $values['actions'];
 			$action_data = "";

@@ -183,7 +183,7 @@ class ItemsController extends \Controller {
 	public function manageItems()
 	{
 		$values = Input::all();
-		$values['bredcum'] = "ITEMS";
+		$values['bredcum'] = "DRUGS";
 		$values['home_url'] = '#';
 		$values['add_url'] = 'additem';
 		$values['form_action'] = 'items';
@@ -202,7 +202,7 @@ class ItemsController extends \Controller {
 		$form_info["method"] = "post";
 		$form_info["class"] = "form-horizontal";
 		$form_info["back_url"] = "items";
-		$form_info["bredcum"] = "add item";
+		$form_info["bredcum"] = "add drug";
 		
 		$manufacturers_arr = array();
 		$manufacturers = \Manufacturers::all();
@@ -241,35 +241,15 @@ class ItemsController extends \Controller {
 		}
 		
 		$form_fields = array();		
-		$form_field = array("name"=>"name", "content"=>"item name", "readonly"=>"","action"=>array("type"=>"onchange","script"=>"checkvalidation(this.value,this.id,'Items')"),  "required"=>"required","type"=>"text", "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"number", "content"=>"item number", "readonly"=>"","required"=>"","type"=>"text", "class"=>"form-control");
+		$form_field = array("name"=>"name", "content"=>"drug name", "readonly"=>"","action"=>array("type"=>"onchange","script"=>"checkvalidation(this.value,this.id,'Items')"),  "required"=>"required","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"shortname", "content"=>"short name", "readonly"=>"",  "required"=>"","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"description", "content"=>"description", "readonly"=>"",  "required"=>"","type"=>"textarea", "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"units", "content"=>"units of measure", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>$units_arr, "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"tags", "content"=>"tags", "readonly"=>"",  "required"=>"", "type"=>"text", "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"itemtype[]", "content"=>"item type", "readonly"=>"",  "required"=>"required", "type"=>"select", "multiple"=>"multiple", "options"=>$itemtypes_arr, "class"=>"form-control chosen-select");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"model", "content"=>"item model", "readonly"=>"",  "required"=>"", "type"=>"text", "class"=>"form-control");
+		$form_field = array("name"=>"itemtype[]", "content"=>"drug type", "readonly"=>"",  "required"=>"required", "type"=>"select", "multiple"=>"multiple", "options"=>$itemtypes_arr, "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"manufacturer[]", "content"=>"manufacturer", "readonly"=>"",  "required"=>"required", "multiple"=>"multiple", "type"=>"select", "options"=>$manufacturers_arr, "class"=>"form-control chosen-select");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"itemactions[]", "content"=>"item actions", "readonly"=>"",  "required"=>"", "multiple"=>"multiple", "type"=>"select", "options"=>$itemactions_arr, "class"=>"form-control chosen-select");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"stocktype", "content"=>"stock type", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("OFFICE"=>"OFFICE","NON OFFICE"=>"NON OFFICE"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"needalert", "content"=>"need alert", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"stockable", "content"=>"stockable", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"expirable", "content"=>"expirable", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"itemnumber", "content"=>"item number", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
 		$form_fields[] = $form_field;
 				
 		$form_info["form_fields"] = $form_fields;
