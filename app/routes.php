@@ -989,3 +989,5 @@ Route::any('/register1', "registrations\OutpatientController@patientRegister");
 
 Route::any('/billing', "billing\BillingController@billing");
 
+Route::any('/billingtest', "billing\BillingController@billing");
+
