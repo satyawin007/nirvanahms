@@ -14,103 +14,65 @@ class OutpatientController extends \Controller {
 		if (\Request::isMethod('post'))
 		{
 			$values = Input::all();
-			$field_names = array("cityname"=>"cityId","officebranchcode"=>"code", "iswarehouse"=>"isWareHouse", "officebranchname"=>"name","statename"=>"stateId");
+			$field_names = array("firstname"=>"firstName","lastname"=>"lastName", "phone"=>"mobile", "gender"=>"gender","dob"=>"dob","age"=>"age","additional_phone"=>"additional_phone","address"=>"address","area"=>"area","state"=>"state","city"=>"city",
+					"marital_status"=>"marital_status","bloodgroup"=>"blood_group","religion"=>"religion","occupation"=>"occupation","email"=>"email_id","billing"=>"billing_details",
+					"consulting_doctor"=>"consulting_doctor","department"=>"doct_department","consultaion_time"=>"consult_time","consultaion_fee"=>"consultaion_fee",
+					"referredby"=>"referredby","complaint"=>"complaint"
+			);
 			$fields = array();
 			foreach ($field_names as $key=>$val){
 				if(isset($values[$key])){
-					$fields[$val] = $values[$key];
-				}
-			}
-			$field_names1 = array(
-					"advanceamount"=>"advanceAmount",  "monthlyrent"=>"monthlyRent", "ownername"=>"ownerName", "contactno"=>"ownerContactNo", "occupationdate"=>"occupiedDate", "agreementexpdate"=>"expDate",
-					"paymenttype"=>"paymentType", "bankaccount"=>"bankAccount", "paymentexpecteday"=>"paymentExpectedDay", "currentbillpaidbyowner"=>"currentBillPaidByOwner", "muncipaltaxpaidbyowner"=>"muncipalTaxPaidByOwner"
-					);
-			$fields1 = array();
-			foreach ($field_names1 as $key=>$val){
-				if(isset($values[$key])){
-					if($val == "occupiedDate" || $val == "expDate"){
-						$fields1[$val] = date("Y-m-d",strtotime($values[$key]));
+					if($val == "dob"){
+						$fields[$val] = date("Y-m-d",strtotime($values[$key]));
+					}
+					elseif($val == "billing_details"){
+						$fields[$val] = "YES";
 					}
 					else {
-						$fields1[$val] = $values[$key];
+						$fields[$val] = $values[$key];
 					}
 				}
 			}
-			
+			$mrno = \Patients::orderBy('id', 'desc')->first();
+			$mrno = $mrno->UHID;
+			$mrno = "HMS".(substr($mrno, 3)+1);
+			$fields['UHID'] = $mrno;
 			$db_functions_ctrl = new DBFunctionsController();
-			$table1 = "\RentDetails";
+			$table = "\Patients";
 			
-			$entity = new \OfficeBranch();
-			foreach($fields as $key=>$value){
-				$entity[$key] = $value;
-			}
-			$entity->save();
-				
-			$branchid = $entity->id;
-			$fields1["officeBranchId"] = $branchid;			
-			
-			if($db_functions_ctrl->insert($table1, $fields1)){
+			if($db_functions_ctrl->insert($table, $fields)){
 				\Session::put("message","Operation completed Successfully");
-				return \Redirect::to("addofficebranch");
+				return \Redirect::to("register");
 			}
 			else{
 				\Session::put("message","Operation Could not be completed, Try Again!");
-				return \Redirect::to("addofficebranch");
+				return \Redirect::to("register");
 			}
 		}
 		
 		$form_info = array();
-		$form_info["name"] = "addofficebranch";
-		$form_info["action"] = "addofficebranch";
+		$form_info["name"] = "register";
+		$form_info["action"] = "register";
 		$form_info["method"] = "post";
 		$form_info["class"] = "form-horizontal";
-		$form_info["back_url"] = "officebranches";
+		$form_info["back_url"] = "";
 		$form_info["bredcum"] = "Registration Form";
 		
 		$form_fields = array();
 		
-		$states =  \State::Where("status","=","ACTIVE")->get();
+		$states =  \State::Where("id","!=",0)->get();
 		$state_arr = array();
 		foreach ($states as $state){
-			$state_arr[$state['id']] = $state->name; 	
-		}
-		$parentId = -1;
-		$parent = \LookupTypeValues::where("name","=","PAYMENT TYPE")->get();
-		if(count($parent)>0){
-			$parent = $parent[0];
-			$parentId = $parent->id;
-		}
-		$paymenttypes =  \LookupTypeValues::where("parentId","=",$parentId)->get();
-		$pmttype_arr = array();
-		foreach ($paymenttypes  as $paymenttype){
-			$pmttype_arr[$paymenttype['name']] = $paymenttype->name;
+			$state_arr[$state['id']] = $state->state_name; 	
 		}
 		
-		$bank_arr = array();
 		
-// 		$cities =  \State::Where("status","=","ACTIVE")->get();
-// 		$cities_arr = array();
-// 		foreach ($cities as $city){
-// 			$cities_arr[$city['id']] = $city->name;
-// 		}
-		
+		$doctors =  \Doctors::Where("status","=","ACTIVE")->get();
+		$doctor_arr = array();
+		foreach ($doctors as $doctor){
+			$doctor_arr[$doctor['id']] = $doctor->name;
+		}
 		$tabs = array();
-// 		$form_fields = array();
-// 		$form_field = array("name"=>"mr_no", "content"=>"MR No", "readonly"=>"",  "required"=>"", "readonly"=>"",  "type"=>"text","action"=>array("type"=>"onchange","script"=>"getPatientDetails(this.value)"),  "class"=>"form-control");
-// 		$form_fields[] = $form_field;
-// 		$form_field = array("name"=>"previous_visit_doctor", "content"=>"previous visit doctor", "readonly"=>"","required"=>"","type"=>"text", "class"=>"form-control");
-// 		$form_fields[] = $form_field;
-// 		$form_field = array("name"=>"medicolegal", "content"=>"Medico Legal Case", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("yes"=>"&nbsp;"),  "class"=>"form-control");
-// 		$form_fields[] = $form_field;
-// 		$form_field = array("name"=>"closepreviousvisit", "content"=>"Close previous Active Visit", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("yes"=>"&nbsp;"),  "class"=>"form-control");
-// 		$form_fields[] = $form_field;
-		
-// 		$tab = array();
-// 		$tab['form_fields'] = $form_fields;
-// 		$tab['href'] = "tabone";
-// 		$tab['heading'] = strtoupper("Patient Details");
-// 		$tabs[] = $tab;
-		
 		$form_fields = array();
 		$form_field = array("name"=>"firstname", "content"=>"first name", "readonly"=>"",  "required"=>"required", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
@@ -120,24 +82,12 @@ class OutpatientController extends \Controller {
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"gender",  "content"=>"gender", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MALE"=>"MALE","FEMALE"=>"FEMALE"), "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"dob",  "content"=>"date of birth", "readonly"=>"",  "required"=>"required", "type"=>"text",  "class"=>"form-control date");
+		$form_field = array("name"=>"dob",  "content"=>"date of birth", "readonly"=>"",  "required"=>"required", "type"=>"text","action"=>array("type"=>"onChange", "script"=>"changeAge(this.value);"),  "class"=>"form-control date");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"age", "content"=>"Age", "readonly"=>"readonly",  "required"=>"", "type"=>"text","class"=>"form-control");
+		$form_field = array("name"=>"age", "content"=>"Age", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"addtional_phone", "content"=>"Additional phone", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
+		$form_field = array("name"=>"additional_phone", "content"=>"Additional phone", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
-// 		$form_field = array("name"=>"Next_of_kin_name", "content"=>"Next of kin name", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-// 		$form_fields[] = $form_field;
-// 		$form_field = array("name"=>"addtional_phone", "content"=>"Additional phone", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-// 		$form_fields[] = $form_field;
-// 		$form_field = array("name"=>"Relation", "content"=>"Relation", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-// 		$form_fields[] = $form_field;
-// 		$form_field = array("name"=>"relation_phone", "content"=>"relation phone No", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-// 		$form_fields[] = $form_field;
-// 		$form_field = array("name"=>"patient_category", "content"=>"Patient category", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>$bank_arr,  "class"=>"form-control");
-// 		$form_fields[] = $form_field;
-// 		$form_field = array("name"=>"casefile", "content"=>"Case file", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
-// 		$form_fields[] = $form_field;
 		$tab = array();
 		$tab['form_fields'] = $form_fields;
 		$tab['href'] = "tabtwo";
@@ -149,21 +99,17 @@ class OutpatientController extends \Controller {
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"area", "content"=>"Area", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"state",  "content"=>"State", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
+		$form_field = array("name"=>"state",  "content"=>"State", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>$state_arr, "action"=>array("type"=>"onChange", "script"=>"changeCity(this.value);"), "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"country",  "content"=>"country", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
+		$form_field = array("name"=>"city",  "content"=>"City", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array(), "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"city",  "content"=>"City", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
+		$form_field = array("name"=>"marital_status",  "content"=>"marital status", "readonly"=>"",  "required"=>"", "type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"marital_status",  "content"=>"marital status", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
+		$form_field = array("name"=>"bloodgroup",  "content"=>"Blood Group", "readonly"=>"",  "required"=>"", "type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"bloodgroup",  "content"=>"Blood Group", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
+		$form_field = array("name"=>"religion",  "content"=>"religion", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"religion",  "content"=>"religion", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"occupation",  "content"=>"occupation", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"remarks", "content"=>"remarks", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
+		$form_field = array("name"=>"occupation",  "content"=>"occupation", "readonly"=>"",  "required"=>"", "type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"email", "content"=>"email id", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
@@ -174,7 +120,7 @@ class OutpatientController extends \Controller {
 		$tabs[] = $tab;
 		
 		$form_fields = array();
-		$form_field = array("name"=>"billing", "content"=>"Billing Details", "readonly"=>"",  "required"=>"required", "type"=>"checkbox", "options"=>array("for_payment"=>"  For payment"), "class"=>"form-control");
+		$form_field = array("name"=>"billing", "content"=>"Billing Details", "readonly"=>"",  "required"=>"", "type"=>"checkbox", "options"=>array("for_payment"=>"  For payment"), "class"=>"form-control");
 		$form_fields[] = $form_field;
 		
 		$tab = array();
@@ -185,21 +131,18 @@ class OutpatientController extends \Controller {
 		
 		
 		$form_fields = array();
-		$form_field = array("name"=>"consulting_doctor", "content"=>"consulting doctor", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>array("MARRIED"=>"MARRIED","SINGLE"=>"SINGLE"), "class"=>"form-control chosen-select");
+		$form_field = array("name"=>"consulting_doctor", "content"=>"consulting doctor", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>$doctor_arr,"action"=>array("type"=>"onChange", "script"=>"doctorInformation(this.value);"), "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"department", "content"=>"department", "readonly"=>"readonly",  "required"=>"required", "type"=>"text",  "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"consultaion_time", "content"=>"date & time", "value"=>date("d-m-Y h:i A"), "readonly"=>"readonly",  "required"=>"required","type"=>"text", "class"=>"form-control date");
-		$form_fields[] = $form_field;
-		$form_field = array("name"=>"consultation_remarks", "content"=>"consultation remarks", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control");
+		$form_field = array("name"=>"consultaion_time", "content"=>"date & time", "value"=>date("d-m-Y h:i A"), "readonly"=>"readonly",  "required"=>"required","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"consultaion_fee", "content"=>"consultation fee", "readonly"=>"readonly",  "required"=>"","type"=>"text", "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"referredby", "content"=>"referred by", "readonly"=>"",  "required"=>"required", "type"=>"text","class"=>"form-control");
+		$form_field = array("name"=>"referredby", "content"=>"referred by", "readonly"=>"",  "required"=>"", "type"=>"text","class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"complaint", "content"=>"complaint", "readonly"=>"",  "required"=>"required", "type"=>"textarea","class"=>"form-control");
+		$form_field = array("name"=>"complaint", "content"=>"complaint", "readonly"=>"",  "required"=>"", "type"=>"textarea","class"=>"form-control");
 		$form_fields[] = $form_field;
-		
 		$tab = array();
 		$tab['form_fields'] = $form_fields;
 		$tab['href'] = "tabsix";
@@ -527,4 +470,33 @@ class OutpatientController extends \Controller {
 		}
 		echo json_encode($json_resp);
 	}
+	public function getDoctorDetails(){
+		$values = Input::all();
+		$doctors =  \Doctors::Where("doctors.status","=","ACTIVE")
+							->Where("doctors.id","=",$values["id"])
+							->leftjoin("departments","departments.id","=","doctors.depart_id")
+							->select("departments.name")
+							->first();
+		echo json_encode($doctors);
+	}
+	
+	public function getCitiesbyStateId()
+	{
+		$values = Input::all();
+		$entities = \City::where("state_id","=",$values['id'])->get();
+		$response = "<option value=''> --select city-- </option>";
+		foreach ($entities as $entity){
+			$response = $response."<option value='".$entity->city_id."'>".$entity->city_name."</option>";
+		}
+		echo $response;
+	}
+	
+	public function getAge(){
+		$values = Input::all();
+		$dob= date('Y',strtotime($values['date']));
+		$today =date('Y');
+		$diff = $today-$dob;
+		echo json_encode($diff);
+	}
+	
 }

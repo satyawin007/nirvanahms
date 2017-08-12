@@ -62,7 +62,7 @@
 												<div class="form-group">
 													<label class="col-xs-4 control-label no-padding-right" for="form-field-1"> <?php echo strtoupper($form_field['content']); if($form_field['required']=="required") echo '<span style="color:red;">*</span>'; ?> </label>
 													<div class="col-xs-8">
-														<input {{$form_field['readonly']}} type="{{$form_field['type']}}" id="{{$form_field['name']}}" {{$form_field['required']}} name="{{$form_field['name']}}" class="{{$form_field['class']}}" <?php if(isset($form_field['action'])) { $action = $form_field['action'];  echo $action['type']."=".$action['script']; }?>>
+														<input {{$form_field['readonly']}} type="{{$form_field['type']}}" id="{{$form_field['name']}}" {{$form_field['required']}} name="{{$form_field['name']}}" class="{{$form_field['class']}}" <?php if(isset($form_field['action'])) { $action = $form_field['action'];  echo $action['type']."=".$action['script']; }?><?php if(isset($form_field['value'])) { echo " value='".$form_field['value']."' "; }?>>
 													</div>			
 												</div>
 												<?php } ?>
@@ -161,11 +161,33 @@
 	
 	@section('inline_js')
 		<script>
-			function changeState(val){
+			function changeCity(val){
 				$.ajax({
 			      url: "getcitiesbystateid?id="+val,
 			      success: function(data) {
-			    	  $("#cityname").html(data);
+			    	  $("#city").html(data);
+			    	  $('.chosen-select').trigger("chosen:updated");
+			      },
+			      type: 'GET'
+			   });
+			}
+			function changeAge(val){
+				$.ajax({
+				      url: "getage?date="+val,
+				      success: function(data) {
+				    	  $("#age").val(data);
+				    	  $('.chosen-select').trigger("chosen:updated");
+				      },
+				      type: 'GET'
+				   });
+			}
+
+			function doctorInformation(val){
+				$.ajax({
+			      url: "getdoctordetails?id="+val,
+			      success: function(data) {
+				      json_data = JSON.parse(data);
+			    	  $("#department").val(json_data.name);
 			    	  $('.chosen-select').trigger("chosen:updated");
 			      },
 			      type: 'GET'
@@ -224,19 +246,6 @@
 			      type: 'GET'
 			   });
 			}
-			
-
-			function changeCity(val){
-				$.ajax({
-			      url: "getbranchbycityid?id="+val,
-			      success: function(data) {
-				      alert(data);
-			    	  $("#branch").html(data);
-			      },
-			      type: 'GET'
-			   });
-			}
-
 			
 			//datepicker plugin
 			//link

@@ -416,7 +416,7 @@ Route::any('/addcity', "masters\CityController@addCity");
 
 Route::any('/editcity', "masters\CityController@editCity");
 
-Route::get('/getcitiesbystateid', "masters\CityController@getCitiesbyStateId");
+//Route::get('/getcitiesbystateid', "masters\CityController@getCitiesbyStateId");
 
 Route::get('/getdepotsbycityid', "masters\CityController@getDepotsbyCityId");
 
@@ -979,7 +979,7 @@ Route::any('/editinpatient', "registrations\InpatientController@editInpatient");
 
 Route::get('/opbilling', "registrations\OutpatientController@addOutpatients");
 
-Route::get('/register', "registrations\OutpatientController@registration");
+Route::any('/register', "registrations\OutpatientController@registration");
 
 Route::any('/addoutpatient', "registrations\OutpatientController@addOutpatients");
 
@@ -989,5 +989,10 @@ Route::any('/register1', "registrations\OutpatientController@patientRegister");
 
 Route::any('/billing', "billing\BillingController@billing");
 
-Route::any('/billingtest', "billing\BillingController@billing");
+Route::get('/getdoctordetails', "registrations\OutpatientController@getDoctorDetails");
+
+Route::get('/getcitiesbystateid', "registrations\OutpatientController@getCitiesbyStateId");
+
+Route::get('/getage', "registrations\OutpatientController@getAge");
+
 
