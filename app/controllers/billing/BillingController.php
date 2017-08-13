@@ -10,78 +10,15 @@ class BillingController extends \Controller {
 	 *
 	 * @return Response
 	 */
-	public function addPurchaseOrder()
-	{
+	public function finalBilling()
+	{	
+		$values = Input::all();
 		if (\Request::isMethod('post'))
 		{
-			//$values["DSF"];
-			$values = Input::all();
-			$url = "purchaseorder";
-			$field_names = array("creditsupplier"=>"creditSupplierId","warehouse"=>"officeBranchId","receivedby"=>"receivedBy", "paymenttype"=>"paymentType",
-						"orderdate"=>"orderDate","paymentdate"=>"paymentDate","billnumber"=>"billNumber","amountpaid"=>"amountPaid","comments"=>"comments","totalamount"=>"totalAmount",
-						"bankaccount"=>"bankAccount","chequenumber"=>"chequeNumber","issuedate"=>"issueDate","incharge"=>"inchargeId",
-						"transactiondate"=>"transactionDate", "suspense"=>"suspense","date1"=>"date","accountnumber"=>"accountNumber","bankname"=>"bankName"
-					);
-			$fields = array();
-			foreach ($field_names as $key=>$val){
-				if(isset($values[$key])){
-					if($key == "orderdate" || $key == "paymentdate" || $key == "date1" || $key == "issuedate" || $key == "transactiondate"){
-						$fields[$val] = date("Y-m-d",strtotime($values[$key]));
-					}
-					else if($key == "suspense"){
-						$sus_vals = array("on"=>"Yes","off"=>"No");
-						$fields[$val] = $sus_vals[$values[$key]];
-					}
-					else{
-						$fields[$val] = $values[$key];
-					}
-				}
-			}
-			if (isset($values["billfile"]) && Input::hasFile('billfile') && Input::file('billfile')->isValid()) {
-				$destinationPath = storage_path().'/uploads/'; // upload path
-				$extension = Input::file('billfile')->getClientOriginalExtension(); // getting image extension
-				$fileName = uniqid().'.'.$extension; // renameing image
-				Input::file('billfile')->move($destinationPath, $fileName); // upl1oading file to given path
-				$fields["filePath"] = $fileName;
-			}
-			$db_functions_ctrl = new DBFunctionsController();
-			$table = "PurchasedOrders";
-			\DB::beginTransaction();
-			$recid = "";
-			try{
-				$recid = $db_functions_ctrl->insertRetId($table, $fields);
-			}
-			catch(\Exception $ex){
-				\Session::put("message","Add Purchase order : Operation Could not be completed, Try Again!");
-				\DB::rollback();
-				return \Redirect::to($url);
-			}
-			try{
-				$db_functions_ctrl = new DBFunctionsController();
-				$table = "PurchasedItems";
-				
-				$jsonitems = json_decode($values["jsondata"]);
-				foreach ($jsonitems as $jsonitem){
-					$fields = array();
-					$fields["purchasedOrderId"] = $recid;
-					$fields["itemId"] = $jsonitem->i5;
-					$fields["itemTypeId"] = $jsonitem->i6;
-					$fields["manufacturerId"] = $jsonitem->i7;
-					$fields["qty"] = $jsonitem->i3;
-					$fields["purchasedQty"] = $jsonitem->i3;
-					$fields["unitPrice"] = $jsonitem->i4;
-					$db_functions_ctrl->insert($table, $fields);
-				}				
-			}
-			catch(\Exception $ex){
-				\Session::put("message","Add Purchase Item : Operation Could not be completed, Try Again!");
-				\DB::rollback();
-				return \Redirect::to($url);
-			}
-			\DB::commit();
+			
+			
 		}
-		\Session::put("message","Operation completed successfully!");
-		return \Redirect::to($url);
+		return View::make("billing.finalbill", array("values"=>$values));		
 	}
 	
 	/**

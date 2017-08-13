@@ -987,12 +987,15 @@ Route::any('/editoutpatient', "registrations\OutpatientController@editOutpatient
 
 Route::any('/register1', "registrations\OutpatientController@patientRegister");
 
-Route::any('/billing', "billing\BillingController@billing");
+Route::any('/finalbilling', "billing\BillingController@finalBilling");
 
 Route::get('/getdoctordetails', "registrations\OutpatientController@getDoctorDetails");
 
 Route::get('/getcitiesbystateid', "registrations\OutpatientController@getCitiesbyStateId");
 
 Route::get('/getage', "registrations\OutpatientController@getAge");
+
+Route::any('/editpatients', "registrations\OutpatientController@editPatient");
+
 
 
