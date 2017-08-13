@@ -4,6 +4,12 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\View;
 use billing\DBFunctionsController;
 class BillingController extends \Controller {
+	public function finalBilling()
+	{	
+		$values = Input::all();
+			
+			
+		return View::make("billing.finalbill", array("values"=>$values));		
 	/**
 	 * manage all states.
 	 *

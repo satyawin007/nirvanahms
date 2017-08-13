@@ -152,6 +152,156 @@ class OutpatientController extends \Controller {
 		return View::make("registrations.registrationform",array("form_info"=>$form_info));		
 	}
 	
+	public function editPatient()
+	{	
+		$values = Input::all();
+		//$val['ad'];
+		if (\Request::isMethod('post'))
+		{
+			$field_names = array("firstname"=>"firstName","lastname"=>"lastName", "phone"=>"mobile", "gender"=>"gender","dob"=>"dob","age"=>"age","additional_phone"=>"additional_phone","address"=>"address","area"=>"area","state"=>"state","city"=>"city",
+					"marital_status"=>"marital_status","bloodgroup"=>"blood_group","religion"=>"religion","occupation"=>"occupation","email"=>"email_id","billing"=>"billing_details",
+					"consulting_doctor"=>"consulting_doctor","department"=>"doct_department","consultaion_time"=>"consult_time","consultaion_fee"=>"consultaion_fee",
+					"referredby"=>"referredby","complaint"=>"complaint"
+			);
+			$fields = array();
+			foreach ($field_names as $key=>$val){
+				if(isset($values[$key])){
+					if($val == "dob"){
+						$fields[$val] = date("Y-m-d",strtotime($values[$key]));
+					}
+					if($val == "billing_details"){
+						$fields[$val] = "YES";
+					}
+					else {
+						$fields[$val] = $values[$key];
+					}
+				}
+				else{
+					if($val == "billing_details"){
+						$fields[$val] = "NO";
+					}
+				}
+			}
+			$db_functions_ctrl = new DBFunctionsController();
+			$table = "\Patients";
+			$ids = \Patients::where("UHID","=",$values["UHID"])->select("id")->first();
+			$data = array("id"=>$ids->id);
+			if($db_functions_ctrl->update($table, $fields, $data)){
+				\Session::put("message","Operation completed Successfully");
+				return \Redirect::to("editpatients?UHID=".$values["UHID"]);
+			}
+			else{
+				\Session::put("message","Operation Could not be completed, Try Again!");
+				return \Redirect::to("editpatients?UHID=".$values["UHID"]);
+			}
+		}
+	
+		$form_info = array();
+		$form_info["name"] = "editpatients";
+		$form_info["action"] = "editpatients";
+		$form_info["method"] = "post";
+		$form_info["class"] = "form-horizontal";
+		$form_info["back_url"] = "";
+		$form_info["bredcum"] = "Registration Form";
+	
+		$form_fields = array();
+	
+		$states =  \State::Where("id","!=",0)->get();
+		$state_arr = array();
+		foreach ($states as $state){
+			$state_arr[$state['id']] = $state->state_name;
+		}
+	
+	
+		$doctors =  \Doctors::Where("status","=","ACTIVE")->get();
+		$doctor_arr = array();
+		foreach ($doctors as $doctor){
+			$doctor_arr[$doctor['id']] = $doctor->name;
+		}
+		$entites = \Patients::where("UHID","=",$values['UHID'])->first();
+		
+		$tabs = array();
+		$form_fields = array();
+		$form_field = array("name"=>"firstname", "content"=>"first name", "readonly"=>"", "value"=>$entites->firstName, "required"=>"required", "type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"lastname", "content"=>"last name", "readonly"=>"","value"=>$entites->lastName,  "required"=>"required", "type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"phone", "content"=>"Mobile No", "readonly"=>"", "value"=>$entites->mobile, "required"=>"required", "type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"gender",  "content"=>"gender", "readonly"=>"","value"=>$entites->gender,  "required"=>"", "type"=>"select", "options"=>array("MALE"=>"MALE","FEMALE"=>"FEMALE"), "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"dob",  "content"=>"date of birth", "readonly"=>"", "value"=>$entites->dob, "required"=>"required", "type"=>"text","action"=>array("type"=>"onChange", "script"=>"changeAge(this.value);"),  "class"=>"form-control date");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"age", "content"=>"Age", "readonly"=>"",  "required"=>"", "value"=>$entites->age,"type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"additional_phone", "content"=>"Additional phone", "readonly"=>"", "value"=>$entites->additional_phone, "required"=>"", "type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$tab = array();
+		$tab['form_fields'] = $form_fields;
+		$tab['href'] = "tabtwo";
+		$tab['heading'] = strtoupper("Basic Information");
+		$tabs[] = $tab;
+	
+		$form_fields = array();
+		$form_field = array("name"=>"address", "content"=>"ADDRESS", "readonly"=>"", "value"=>$entites->address, "required"=>"", "type"=>"textarea","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"area", "content"=>"Area", "readonly"=>"","value"=>$entites->area,  "required"=>"", "type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"state",  "content"=>"State", "readonly"=>"", "value"=>$entites->state, "required"=>"", "type"=>"select", "options"=>$state_arr, "action"=>array("type"=>"onChange", "script"=>"changeCity(this.value);"), "class"=>"form-control chosen-select");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"city",  "content"=>"City", "readonly"=>"", "value"=>$entites->city, "required"=>"", "type"=>"select", "options"=>array(), "class"=>"form-control chosen-select");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"marital_status",  "content"=>"marital status", "value"=>$entites->marital_status,"readonly"=>"",  "required"=>"", "type"=>"text", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"bloodgroup",  "content"=>"Blood Group", "readonly"=>"", "value"=>$entites->blood_group, "required"=>"", "type"=>"text", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"religion",  "content"=>"religion", "readonly"=>"", "value"=>$entites->religion, "required"=>"", "type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"occupation",  "content"=>"occupation", "readonly"=>"","value"=>$entites->occupation,  "required"=>"", "type"=>"text", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"email", "content"=>"email id", "readonly"=>"", "value"=>$entites->email_id, "required"=>"", "type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$tab = array();
+		$tab['form_fields'] = $form_fields;
+		$tab['href'] = "tabthree";
+		$tab['heading'] = strtoupper("Addtional Patient Information");
+		$tabs[] = $tab;
+	
+		$form_fields = array();
+		$form_field = array("name"=>"billing", "content"=>"Billing Details", "readonly"=>"", "value"=>$entites->billing_details, "required"=>"", "type"=>"checkbox", "options"=>array("for_payment"=>"  For payment"), "class"=>"form-control");
+		$form_fields[] = $form_field;
+		
+		$tab = array();
+		$tab['form_fields'] = $form_fields;
+		$tab['href'] = "tabfour";
+		$tab['heading'] = strtoupper("sponsor information");
+		$tabs[] = $tab;
+	
+	
+		$form_fields = array();
+		$form_field = array("name"=>"consulting_doctor", "content"=>"consulting doctor","value"=>$entites->consulting_doctor, "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>$doctor_arr,"action"=>array("type"=>"onChange", "script"=>"doctorInformation(this.value);"), "class"=>"form-control chosen-select");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"department", "content"=>"department", "readonly"=>"readonly", "value"=>$entites->doct_department, "required"=>"required", "type"=>"text",  "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"consultaion_time", "content"=>"date & time", "value"=>$entites->consult_time, "readonly"=>"readonly",  "required"=>"required","type"=>"text", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"consultaion_fee", "content"=>"consultation fee","value"=>$entites->consultaion_fee, "readonly"=>"readonly",  "required"=>"","type"=>"text", "class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"referredby", "content"=>"referred by", "readonly"=>"", "value"=>$entites->referredby, "required"=>"", "type"=>"text","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"complaint", "content"=>"complaint", "readonly"=>"", "value"=>$entites->complaint, "required"=>"", "type"=>"textarea","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"UHID","readonly"=>"", "value"=>$entites->UHID, "required"=>"required", "type"=>"hidden","class"=>"form-control");
+		$form_fields[] = $form_field;
+		$tab = array();
+		$tab['form_fields'] = $form_fields;
+		$tab['href'] = "tabsix";
+		$tab['heading'] = strtoupper("admission information");
+		$tabs[] = $tab;
+		$form_info["tabs"] = $tabs;
+		return View::make("registrations.editpatientform",array("form_info"=>$form_info));
+	}
+	
 	/**
 	 * edit a Office Branch.
 	 *
@@ -365,6 +515,8 @@ class OutpatientController extends \Controller {
 			
 		return View::make('registrations.datatable', array("values"=>$values));
 	}
+	
+	
 	
 	public function patientRegister()
 	{
