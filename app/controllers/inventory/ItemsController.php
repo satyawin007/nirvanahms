@@ -110,60 +110,28 @@ class ItemsController extends \Controller {
 				$itemtypes_arr[$item_type->id] = $item_type->name;
 			}
 			
-			$parentId = -1;
-			$parent = \InventoryLookupValues::where("name","=","UNITS OF MEASUREMENT")->get();
-			if(count($parent)>0){
-				$parent = $parent[0];
-				$parentId = $parent->id;
-			}
-			$units =  \InventoryLookupValues::where("parentId","=",$parentId)->where("status","=","ACTIVE")->get();
-			$units_arr = array();
-			foreach ($units  as $unit){
-				$units_arr[$unit['id']] = $unit->name;
-			}
-			
-			$parentId = -1;
-			$parent = \InventoryLookupValues::where("name","=","ITEM ACTIONS")->get();
-			if(count($parent)>0){
-				$parent = $parent[0];
-				$parentId = $parent->id;
-			}
-			$units =  \InventoryLookupValues::where("parentId","=",$parentId)->where("status","=","ACTIVE")->get();
-			$itemactions_arr = array();
-			foreach ($units  as $unit){
-				$itemactions_arr[$unit['id']] = $unit->name;
-			}
+// 			$parentId = -1;
+// 			$parent = \InventoryLookupValues::where("name","=","UNITS OF MEASUREMENT")->get();
+// 			if(count($parent)>0){
+// 				$parent = $parent[0];
+// 				$parentId = $parent->id;
+// 			}
+// 			$units =  \InventoryLookupValues::where("parentId","=",$parentId)->where("status","=","ACTIVE")->get();
+// 			$units_arr = array();
+// 			foreach ($units  as $unit){
+// 				$units_arr[$unit['id']] = $unit->name;
+// 			}
 			
 			$form_fields = array();		
-			$form_field = array("name"=>"name", "value"=>$entity->name, "content"=>"item name", "readonly"=>"",  "required"=>"required","type"=>"text", "class"=>"form-control");
+			$form_field = array("name"=>"name", "value"=>$entity->name, "content"=>"drug name", "readonly"=>"","action"=>array("type"=>"onchange","script"=>"checkvalidation(this.value,this.id,'Items')"),  "required"=>"required","type"=>"text", "class"=>"form-control");
 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"number", "value"=>$entity->number,  "content"=>"item number", "readonly"=>"","required"=>"","type"=>"text", "class"=>"form-control");
+			$form_field = array("name"=>"shortname", "value"=>$entity->shortName, "content"=>"short name", "readonly"=>"",  "required"=>"","type"=>"text", "class"=>"form-control");
 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"shortname", "value"=>$entity->shortName,  "content"=>"short name", "readonly"=>"",  "required"=>"","type"=>"text", "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"description", "value"=>$entity->description,  "content"=>"description", "readonly"=>"",  "required"=>"","type"=>"textarea", "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"units", "id"=>"units", "value"=>$entity->unitsOfMeasure,  "content"=>"units of measure", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>$units_arr, "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"tags", "value"=>$entity->tags,  "content"=>"tags", "readonly"=>"",  "required"=>"", "type"=>"text", "class"=>"form-control");
+			$form_field = array("name"=>"description", "value"=>$entity->description, "content"=>"description", "readonly"=>"",  "required"=>"","type"=>"textarea", "class"=>"form-control");
 			$form_fields[] = $form_field;
 			$form_field = array("name"=>"itemtype[]", "id"=>"itemtype", "value"=>explode(",", $entity->itemTypeId),  "content"=>"item type", "readonly"=>"",  "required"=>"", "type"=>"select", "multiple"=>"multiple", "options"=>$itemtypes_arr, "class"=>"form-control chosen-select");
 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"model", "value"=>$entity->itemModel,  "content"=>"item model", "readonly"=>"",  "required"=>"", "type"=>"text", "class"=>"form-control");
-			$form_fields[] = $form_field;
 			$form_field = array("name"=>"manufacturer[]", "id"=>"manufacturer", "value"=>explode(",", $entity->manufactures),  "content"=>"manufacturer", "readonly"=>"",  "required"=>"", "multiple"=>"multiple", "type"=>"select", "options"=>$manufacturers_arr, "class"=>"form-control chosen-select");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"itemactions[]", "id"=>"itemactions", "value"=>explode(",", $entity->itemActions),  "content"=>"item actions", "readonly"=>"",  "required"=>"", "multiple"=>"multiple", "type"=>"select", "options"=>$itemactions_arr, "class"=>"form-control chosen-select");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"stocktype", "value"=>$entity->stockType,  "content"=>"stock type", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("OFFICE"=>"OFFICE","NON OFFICE"=>"NON OFFICE"), "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"needalert", "value"=>$entity->needAlert,  "content"=>"need alert", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"stockable", "value"=>$entity->stockable,  "content"=>"stockable", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"expirable", "value"=>$entity->expirable,  "content"=>"expirable", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"itemnumber", "content"=>"item number", "value"=>$entity->itemNumber, "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
 			$form_fields[] = $form_field;
 			$form_field = array("name"=>"status", "id"=>"status", "value"=>$entity->status,  "content"=>"status", "readonly"=>"",  "required"=>"", "type"=>"select", "options"=>array("ACTIVE"=>"ACTIVE","INACTIVE"=>"INACTIVE"), "class"=>"form-control");
 			$form_fields[] = $form_field;
@@ -188,7 +156,7 @@ class ItemsController extends \Controller {
 		$values['add_url'] = 'additem';
 		$values['form_action'] = 'items';
 		$values['action_val'] = '#';
-		$theads = array('Name', "Description", "short name", "units", "tags", "item model", "item type", "manufacturer", "stockable", "expirable", "status", "Actions");
+		$theads = array('Name', "Description", "short name", "item type", "manufacturer", "status", "Actions");
 		$values["theads"] = $theads;
 			
 		$actions = array();

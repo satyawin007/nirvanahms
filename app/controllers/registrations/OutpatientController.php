@@ -483,10 +483,10 @@ class OutpatientController extends \Controller {
 	public function getCitiesbyStateId()
 	{
 		$values = Input::all();
-		$entities = \City::where("state_id","=",$values['id'])->get();
+		$entities = \City::where("stateId","=",$values['id'])->get();
 		$response = "<option value=''> --select city-- </option>";
 		foreach ($entities as $entity){
-			$response = $response."<option value='".$entity->city_id."'>".$entity->city_name."</option>";
+			$response = $response."<option value='".$entity->id."'>".$entity->name."</option>";
 		}
 		echo $response;
 	}

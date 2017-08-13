@@ -2,212 +2,8 @@
 
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\View;
-use settings\AppSettingsController;
+use billing\DBFunctionsController;
 class BillingController extends \Controller {
-
-	/**
-	 * add a new state.
-	 *
-	 * @return Response
-	 */
-	public function addPurchaseOrder()
-	{
-		if (\Request::isMethod('post'))
-		{
-			//$values["DSF"];
-			$values = Input::all();
-			$url = "purchaseorder";
-			$field_names = array("creditsupplier"=>"creditSupplierId","warehouse"=>"officeBranchId","receivedby"=>"receivedBy", "paymenttype"=>"paymentType",
-						"orderdate"=>"orderDate","paymentdate"=>"paymentDate","billnumber"=>"billNumber","amountpaid"=>"amountPaid","comments"=>"comments","totalamount"=>"totalAmount",
-						"bankaccount"=>"bankAccount","chequenumber"=>"chequeNumber","issuedate"=>"issueDate","incharge"=>"inchargeId",
-						"transactiondate"=>"transactionDate", "suspense"=>"suspense","date1"=>"date","accountnumber"=>"accountNumber","bankname"=>"bankName"
-					);
-			$fields = array();
-			foreach ($field_names as $key=>$val){
-				if(isset($values[$key])){
-					if($key == "orderdate" || $key == "paymentdate" || $key == "date1" || $key == "issuedate" || $key == "transactiondate"){
-						$fields[$val] = date("Y-m-d",strtotime($values[$key]));
-					}
-					else if($key == "suspense"){
-						$sus_vals = array("on"=>"Yes","off"=>"No");
-						$fields[$val] = $sus_vals[$values[$key]];
-					}
-					else{
-						$fields[$val] = $values[$key];
-					}
-				}
-			}
-			if (isset($values["billfile"]) && Input::hasFile('billfile') && Input::file('billfile')->isValid()) {
-				$destinationPath = storage_path().'/uploads/'; // upload path
-				$extension = Input::file('billfile')->getClientOriginalExtension(); // getting image extension
-				$fileName = uniqid().'.'.$extension; // renameing image
-				Input::file('billfile')->move($destinationPath, $fileName); // upl1oading file to given path
-				$fields["filePath"] = $fileName;
-			}
-			$db_functions_ctrl = new DBFunctionsController();
-			$table = "PurchasedOrders";
-			\DB::beginTransaction();
-			$recid = "";
-			try{
-				$recid = $db_functions_ctrl->insertRetId($table, $fields);
-			}
-			catch(\Exception $ex){
-				\Session::put("message","Add Purchase order : Operation Could not be completed, Try Again!");
-				\DB::rollback();
-				return \Redirect::to($url);
-			}
-			try{
-				$db_functions_ctrl = new DBFunctionsController();
-				$table = "PurchasedItems";
-				
-				$jsonitems = json_decode($values["jsondata"]);
-				foreach ($jsonitems as $jsonitem){
-					$fields = array();
-					$fields["purchasedOrderId"] = $recid;
-					$fields["itemId"] = $jsonitem->i5;
-					$fields["itemTypeId"] = $jsonitem->i6;
-					$fields["manufacturerId"] = $jsonitem->i7;
-					$fields["qty"] = $jsonitem->i3;
-					$fields["purchasedQty"] = $jsonitem->i3;
-					$fields["unitPrice"] = $jsonitem->i4;
-					$db_functions_ctrl->insert($table, $fields);
-				}				
-			}
-			catch(\Exception $ex){
-				\Session::put("message","Add Purchase Item : Operation Could not be completed, Try Again!");
-				\DB::rollback();
-				return \Redirect::to($url);
-			}
-			\DB::commit();
-		}
-		\Session::put("message","Operation completed successfully!");
-		return \Redirect::to($url);
-	}
-	
-	/**
-	 * Edit a state.
-	 *
-	 * @return Response
-	 */
-	public function editPurchaseOrder1()
-	{
-		$values = Input::all();
-		if (\Request::isMethod('post'))
-		{
-			$field_names = array("creditsupplier"=>"creditSupplierId","warehouse"=>"officeBranchId","receivedby"=>"receivedBy", "paymenttype"=>"paymentType",
-						"orderdate"=>"orderDate","billnumber"=>"billNumber","amountpaid"=>"amountPaid","comments"=>"comments","totalamount"=>"totalAmount",
-						"bankaccount"=>"bankAccount","chequenumber"=>"chequeNumber","issuedate"=>"issueDate",
-						"transactiondate"=>"transactionDate","date1"=>"date","suspense"=>"suspense","accountnumber"=>"accountNumber","bankname"=>"bankName"
-					);
-			$fields = array();
-			foreach ($field_names as $key=>$val){
-				if(isset($values[$key])){
-					if($key == "orderdate" || $key == "date1" || $key == "issuedate" || $key == "transactiondate"){
-						$fields[$val] = date("Y-m-d",strtotime($values[$key]));
-					}
-					else if($key == "suspense"){
-						$sus_vals = array("on"=>"Yes","off"=>"No");
-						$fields[$val] = $sus_vals[$values[$key]];
-					}
-					else{
-						$fields[$val] = $values[$key];
-					}
-				}
-			}
-			if (isset($values["billfile"]) && Input::hasFile('billfile') && Input::file('billfile')->isValid()) {
-				$destinationPath = storage_path().'/uploads/'; // upload path
-				$extension = Input::file('billfile')->getClientOriginalExtension(); // getting image extension
-				$fileName = uniqid().'.'.$extension; // renameing image
-				Input::file('billfile')->move($destinationPath, $fileName); // upl1oading file to given path
-				$fields["filePath"] = $fileName;
-			}
-			if(!isset($values["suspense"])){
-				$fields["suspense"] = "No";
-			}
-			$data = array('id'=>$values['id']);			
-			$db_functions_ctrl = new DBFunctionsController();
-			$table = "\PurchasedOrders"; 
-			
-			if($db_functions_ctrl->update($table, $fields, $data)){
-				\Session::put("message","Operation completed Successfully");
-				return \Redirect::to("editpurchaseorder?id=".$values['id']);
-			}
-			else{
-				\Session::put("message","Operation Could not be completed, Try Again!");
-				return \Redirect::to("editpurchaseorder?id=".$values['id']);
-			}
-		}
-		$form_info = array();
-		$form_info["name"] = "editpurchaseorder";
-		$form_info["action"] = "editpurchaseorder";
-		$form_info["method"] = "post";
-		$form_info["class"] = "form-horizontal";
-		$form_info["back_url"] = "purchaseorder";
-		$form_info["bredcum"] = "edit purchaseorder";
-	
-		$entity = \PurchasedOrders::where("id","=",$values['id'])->get();
-		if(count($entity)){
-			$entity = $entity[0];
-			
-			$types =  \InventoryLookupValues::where("parentId", "=", 0)->get();
-			$types_arr = array();
-			foreach ($types as $type){
-				$types_arr[$type->id] = $type->name;
-			}
-			$val = "";
-			if(!isset($values["type"])){
-				$values["type"] = "-1";
-			}
-			
-			$credit_sup_arr = array();
-			$credit_sups = \CreditSupplier::All();
-			foreach ($credit_sups as $credit_sup){
-				$credit_sup_arr[$credit_sup->id] = $credit_sup->supplierName;
-			}
-			$emp_arr = array();
-			$emps = \Employee::where("roleId","!=","19")->orWhere("roleId","!=","20")->get();
-			foreach ($emps as $emp){
-				$emp_arr[$emp->id] = $emp->fullName;
-			}
-			
-			$warehouse_arr = array();
-			$warehouses = \OfficeBranch::where("isWareHouse","=","Yes")->get();
-			foreach ($warehouses as $warehouse){
-				$warehouse_arr[$warehouse->id] = $warehouse->name;
-			}
-			$form_fields = array();
-			$form_field = array("name"=>"creditsupplier", "id"=>"creditsupplier", "value"=>$entity->creditSupplierId, "content"=>"credit supplier", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$credit_sup_arr, "class"=>"form-control chosen-select");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"warehouse", "id"=>"warehouse", "value"=>$entity->officeBranchId, "content"=>"warehouse", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$warehouse_arr, "class"=>"form-control chosen-select");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"receivedby", "id"=>"receivedby", "value"=>$entity->receivedBy, "content"=>"received by", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$emp_arr, "class"=>"form-control chosen-select");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"orderdate", "id"=>"orderdate", "value"=> date("d-m-Y",strtotime($entity->orderDate)), "content"=>"order date", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control date-picker");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"billnumber", "id"=>"billnumber", "value"=>$entity->billNumber, "content"=>"bill number", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"suspense", "content"=>"suspense", "value"=>$entity->suspense, "readonly"=>"", "required"=>"","type"=>"checkboxslide", "options"=>array("YES"=>" YES","NO"=>" NO"),  "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"billfile", "content"=>"upload bill",  "value"=>$entity->filePath, "readonly"=>"", "required"=>"", "type"=>"file", "class"=>"form-control file");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"amountpaid", "id"=>"amountpaid", "value"=>$entity->amountPaid, "content"=>"amount paid", "readonly"=>"", "required"=>"","type"=>"select", "action"=>array("type"=>"onChange","script"=>"enablePaymentType(this.value)"), "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"paymenttype", "id"=>"paymenttype", "value"=>$entity->paymentType, "content"=>"payment type", "readonly"=>"", "required"=>"","type"=>"select", "action"=>array("type"=>"onchange","script"=>"showPaymentFields(this.value)"), "options"=>array("cash"=>"CASH","advance"=>"FROM ADVANCE","cheque_debit"=>"CHEQUE (CREDIT)","cheque_credit"=>"CHEQUE (DEBIT)","ecs"=>"ECS","neft"=>"NEFT","rtgs"=>"RTGS","dd"=>"DD","credit_card"=>"CREDIT CARD","debit_card"=>"DEBIT CARD"), "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"comments", "id"=>"comments", "value"=>$entity->comments, "content"=>"comments", "readonly"=>"", "required"=>"required","type"=>"textarea", "class"=>"form-control ");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"totalamount", "id"=>"totalamount", "value"=>$entity->totalAmount, "content"=>"total amount", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control ");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"id", "value"=>$entity->id, "content"=>"", "readonly"=>"", "required"=>"required","type"=>"hidden", "class"=>"form-control ");
-			$form_fields[] = $form_field;
-		
-			$form_info["form_fields"] = $form_fields;
-			return View::make("transactions.edit2colmodalform",array("form_info"=>$form_info));
-		}
-	}
-	
-		
-	
 	/**
 	 * manage all states.
 	 *
@@ -419,185 +215,64 @@ class BillingController extends \Controller {
 	public function billing()
 	{
 		$values = Input::all();
-		
 		if (\Request::isMethod('post'))
 		{
-			//$values["sdf"];
-			if($values["type"] == "repairs"){
-				$url = "editpurchaseorder?&type=repairs&id=".$values["id"];
-				if(isset($values["stocktype"])&& $values["stocktype"]=="office"){
-					$url = $url."&stocktype=office";
-				}
-				else{
-					$url = $url."&stocktype=nonoffice";
-				}
-				$field_names = array("creditsupplier"=>"creditSupplierId","warehouse"=>"officeBranchId","receivedby"=>"receivedBy", "paymenttype"=>"paymentType",
-						"orderdate"=>"orderDate","paymentdate"=>"paymentDate","billnumber"=>"billNumber","amountpaid"=>"amountPaid","comments"=>"comments","totalamount"=>"totalAmount",
-						"bankaccount"=>"bankAccount","chequenumber"=>"chequeNumber","issuedate"=>"issueDate","incharge"=>"inchargeId",
-						"transactiondate"=>"transactionDate", "suspense"=>"suspense","date1"=>"date","accountnumber"=>"accountNumber","bankname"=>"bankName"
-				);
-				$fields = array();
-				foreach ($field_names as $key=>$val){
-					if(isset($values[$key])){
-						if($key == "orderdate" || $key == "paymentdate" ||$key == "date1" || $key == "issuedate" || $key == "transactiondate"){
-							$fields[$val] = date("Y-m-d",strtotime($values[$key]));
-						}
-						else if($key == "suspense"){
-							$sus_vals = array("on"=>"Yes","off"=>"No");
-							$fields[$val] = $sus_vals[$values[$key]];
-						}
-						else{
-							$fields[$val] = $values[$key];
-						}
-					}
-				}
-				if (isset($values["billfile"]) && Input::hasFile('billfile') && Input::file('billfile')->isValid()) {
-					$destinationPath = storage_path().'/uploads/'; // upload path
-					$extension = Input::file('billfile')->getClientOriginalExtension(); // getting image extension
-					$fileName = uniqid().'.'.$extension; // renameing image
-					Input::file('billfile')->move($destinationPath, $fileName); // upl1oading file to given path
-					$fields["filePath"] = $fileName;
-				}
+			//val["sda"];
+			$url = "billing?&type=".$values["type"]."&uhid=".$values["uhid"];
+			\DB::beginTransaction();
+// 			try{
 				$db_functions_ctrl = new DBFunctionsController();
-				$table = "PurchasedOrders";
-				\DB::beginTransaction();
-				$recid = "";
-				try{
-					$db_functions_ctrl->update($table, $fields, array("id"=>$values["id"]));
-				}
-				catch(\Exception $ex){
-					\Session::put("message","UpdatePurchase1 order : Operation Could not be completed, Try Again!");
-					\DB::rollback();
-					return \Redirect::to($url);
-				}
-				try{
-					$db_functions_ctrl = new DBFunctionsController();
-					$table = "PurchasedItems";
-					$table::where('purchasedOrderId',"=", $values['id'])->update(array("status"=>"DELETED"));
-						
-					$jsonitems = json_decode($values["jsondata"]);
-						
+				$table = "\PatientTransactions"; 
+				$jsonitems = json_decode($values["jsondata"]);
+				if($values['type']=="diagnostics"){
+					$table::where('type',"=", $values['type'])->where('uhid',"=", $values['uhid'])->update(array("status"=>"DELETED"));
 					foreach($jsonitems as $jsonitem){
 						$fields = array();
-						$fields["itemId"] = $jsonitem->i9;
-						$fields["manufacturerId"] = $jsonitem->i10;
-						$fields["vehicleId"] = $jsonitem->i11;
-						$fields["qty"] = $jsonitem->i5;
-						$fields["purchasedQty"] = $jsonitem->i5;
-						$fields["itemNumbers"] = $jsonitem->i4;
-						$fields["unitPrice"] = 0;
-						if (isset($jsonitem->i6) && $jsonitem->i6 != "" ){
-							$fields["unitPrice"] = $jsonitem->i6;
-						}
-						$fields["itemStatus"] = $jsonitem->i3;
-						$fields["remarks"] = $jsonitem->i7;
-						
-						if($jsonitem->i12 == "undefined"){
-							$fields["purchasedOrderId"] = $values["id"];
+						$fields["uhid"] = $values["uhid"];
+						$fields["entityId"] = $jsonitem->i6;
+						$fields["type"] = $values["type"];
+						$fields["amount"] = $jsonitem->i4;
+						$fields["date"] =  date("Y-m-d", strtotime($jsonitem->i3));
+						if($jsonitem->i5 == "undefined"){
 							$db_functions_ctrl->insert($table, $fields);
 						}
 						else{
-							$data = array("id"=>$jsonitem->i12);
+							$data = array("id"=>$jsonitem->i5);
 							$fields["status"] = "ACTIVE";
 							$db_functions_ctrl->update($table, $fields, $data);
 						}
 					}
-						
 				}
-				catch(\Exception $ex){
-					\Session::put("message","Update Purchase2 Item : Operation Could not be completed, Try Again!");
-					\DB::rollback();
-					return \Redirect::to($url);
-				}
-				\DB::commit();
-				\Redirect::to($url);
-				
-			}
-			else {
-				$url = "editpurchaseorder?id=".$values["id"];
-				if(isset($values["stocktype"])&& $values["stocktype"]=="office"){
-					$url = $url."&stocktype=office";
-				}
-				else{
-					$url = $url."&stocktype=nonoffice";
-				}
-				$field_names = array("creditsupplier"=>"creditSupplierId","warehouse"=>"officeBranchId","receivedby"=>"receivedBy", "paymenttype"=>"paymentType",
-							"orderdate"=>"orderDate","paymentdate"=>"paymentDate","billnumber"=>"billNumber","amountpaid"=>"amountPaid","comments"=>"comments","totalamount"=>"totalAmount",
-							"bankaccount"=>"bankAccount","chequenumber"=>"chequeNumber","issuedate"=>"issueDate","incharge"=>"inchargeId",
-							"transactiondate"=>"transactionDate", "suspense"=>"suspense","date1"=>"date","accountnumber"=>"accountNumber","bankname"=>"bankName"
-						);
-				$fields = array();
-				foreach ($field_names as $key=>$val){
-					if(isset($values[$key])){
-						if($key == "orderdate" || $key == "paymentdate" || $key == "date1" || $key == "issuedate" || $key == "transactiondate"){
-							$fields[$val] = date("Y-m-d",strtotime($values[$key]));
-						}
-						else if($key == "suspense"){
-							$sus_vals = array("on"=>"Yes","off"=>"No");
-							$fields[$val] = $sus_vals[$values[$key]];
-						}
-						else{
-							$fields[$val] = $values[$key];
-						}
-					}
-				}
-				if (isset($values["billfile"]) && Input::hasFile('billfile') && Input::file('billfile')->isValid()) {
-					$destinationPath = storage_path().'/uploads/'; // upload path
-					$extension = Input::file('billfile')->getClientOriginalExtension(); // getting image extension
-					$fileName = uniqid().'.'.$extension; // renameing image
-					Input::file('billfile')->move($destinationPath, $fileName); // upl1oading file to given path
-					$fields["filePath"] = $fileName;
-				}
-				$db_functions_ctrl = new DBFunctionsController();
-				$table = "PurchasedOrders";
-				\DB::beginTransaction();
-				$recid = "";
-				try{
-					$db_functions_ctrl->update($table, $fields, array("id"=>$values["id"]));
-				}
-				catch(\Exception $ex){
-					\Session::put("message","UpdatePurchase order : Operation Could not be completed, Try Again!");
-					\DB::rollback();
-					return \Redirect::to($url);
-				}
-				try{
-					$db_functions_ctrl = new DBFunctionsController();
-					$table = "PurchasedItems";
-					$table::where('purchasedOrderId',"=", $values['id'])->update(array("status"=>"DELETED"));
-					
-					$jsonitems = json_decode($values["jsondata"]);
-					
-					foreach ($jsonitems as $jsonitem){
+				else if($values['type']=="pharmacy"){
+					$table::where('type',"=", $values['type'])->where('uhid',"=", $values['uhid'])->update(array("status"=>"DELETED"));
+					foreach($jsonitems as $jsonitem){
 						$fields = array();
-						$fields["itemId"] = $jsonitem->i8;
-						$fields["itemTypeId"] = $jsonitem->i9;
-						$fields["manufacturerId"] = $jsonitem->i10;
-						$fields["itemNumbers"] = $jsonitem->i3;
-						$fields["itemNumbersAll"] = $jsonitem->i3;
-						$fields["qty"] = $jsonitem->i4;
-						$fields["purchasedQty"] = $jsonitem->i4;
-						$fields["unitPrice"] = $jsonitem->i5;
-						$fields["itemStatus"] = $jsonitem->i6;
-						$fields["status"] = "ACTIVE";
-						if($jsonitem->i7 == "undefined"){
-							$fields["purchasedOrderId"] = $values["id"];
+						$fields["uhid"] = $values["uhid"];
+						$fields["entityId"] = $jsonitem->i6;
+						$fields["type"] = $values["type"];
+						$fields["batchNo"] = $jsonitem->i1;
+						$fields["expiryDate"] =  date("Y-m-d", strtotime($jsonitem->i2));
+						$fields["qty"] = $jsonitem->i3;
+						$fields["amount"] = $jsonitem->i4;
+						if($jsonitem->i5 == "undefined"){
 							$db_functions_ctrl->insert($table, $fields);
 						}
 						else{
-							$data = array("id"=>$jsonitem->i7);
+							$data = array("id"=>$jsonitem->i5);
+							$fields["status"] = "ACTIVE";
 							$db_functions_ctrl->update($table, $fields, $data);
 						}
 					}
-					
 				}
-				catch(\Exception $ex){
-					\Session::put("message","Update Purchase Item : Operation Could not be completed, Try Again!");
-					\DB::rollback();
-					return \Redirect::to($url);
-				}
-				\DB::commit();
-				\Redirect::to($url);
-			}
+// 			}
+// 			catch(\Exception $ex){
+// 				\Session::put("message","Update Purchase2 Item : Operation Could not be completed, Try Again!");
+// 				\DB::rollback();
+// 				\Redirect::to($url);
+// 			}
+			\DB::commit();
+			\Session::put("message","operation completed successfully!");
+			\Redirect::to($url);
 		}
 		$values['bredcum'] = "ADD DIAGNOSTICS";
 		$values['home_url'] = '#';
@@ -610,8 +285,8 @@ class BillingController extends \Controller {
 		
 		$values["id"] = 10;
 		$form_info = array();
-		$form_info["name"] = "editpurchaseorder";
-		$form_info["action"] = "editpurchaseorder?id=".$values["id"];
+		$form_info["name"] = "billing";
+		$form_info["action"] = "billing";
 		$form_info["method"] = "post";
 		$form_info["class"] = "form-horizontal";
 		$form_info["back_url"] = "#";
@@ -626,25 +301,38 @@ class BillingController extends \Controller {
 			$types_arr[$type->id] = $type->name;
 		}
 		$val = "";
-		if(!isset($values["type"])){
-			$values["type"] = "-1";
+		$patient = "";
+		if(!isset($values["uhid"])){
+			return View::make('billing.billing', array("values"=>$values));
+		}
+		else if(isset($values["uhid"])){
+			$patient = \Patients::where("UHID","=",$values["uhid"])->first();
+			if(count($patient)<=0){
+				\Session::put("message","UHID is not found, Try Again!");
+				return View::make('billing.billing', array("values"=>$values));
+			}
 		}
 	
-		$entity = \PurchasedOrders::where("id",">",0)->get();
-		if(count($entity)){
-			$entity = $entity[0];
-			
-			$form_field = array("name"=>"MRNO", "content"=>"MRNO", "readonly"=>"readonly", "value"=>"", "required"=>"","type"=>"text", "class"=>"form-control");
+		if(true){
+			$form_field = array("name"=>"uhid", "content"=>"UHID", "value"=>$patient->UHID, "readonly"=>"readonly", "required"=>"","type"=>"text", "class"=>"form-control");
 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"fullname", "value"=>"", "content"=>"full name", "readonly"=>"",  "required"=>"required", "type"=>"text", "class"=>"form-control");
+			$form_field = array("name"=>"firstname", "value"=>$patient->firstName, "content"=>"first name", "readonly"=>"readonly",  "required"=>"required", "type"=>"text","class"=>"form-control");
 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"mobile_number", "value"=>"", "content"=>"mobile number", "readonly"=>"",  "required"=>"required", "type"=>"text", "class"=>"form-control");
+			$form_field = array("name"=>"lastname", "value"=>$patient->lastName, "content"=>"last name", "readonly"=>"readonly",  "required"=>"required", "type"=>"text","class"=>"form-control");
 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"age", "value"=>"", "content"=>"age", "readonly"=>"",  "required"=>"required", "type"=>"text", "class"=>"form-control");
+			$form_field = array("name"=>"phone", "value"=>$patient->phone, "content"=>"Mobile No", "readonly"=>"readonly",  "required"=>"required", "type"=>"text","class"=>"form-control");
 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"gender","id"=>"gender", "value"=>"",  "content"=>"gender", "readonly"=>"",  "required"=>"required", "type"=>"select", "options"=>array("MALE"=>"MALE","FEMALE"=>"FEMALE"), "class"=>"form-control");
+			$form_field = array("name"=>"gender",  "value"=>$patient->gender, "content"=>"gender", "readonly"=>"readonly",  "required"=>"", "type"=>"text", "class"=>"form-control");
 			$form_fields[] = $form_field;
-			$form_field = array("name"=>"visit_type", "value"=>"", "content"=>"visit type", "readonly"=>"",  "required"=>"", "type"=>"radio", "options"=>array("free"=>"free","pay"=>"pay"), "class"=>"form-control");
+			$form_field = array("name"=>"dob",  "value"=>$patient->dob, "content"=>"date of birth", "readonly"=>"readonly",  "required"=>"required", "type"=>"text","action"=>array("type"=>"onChange", "script"=>"changeAge(this.value);"),  "class"=>"form-control date");
+			$form_fields[] = $form_field;
+			$form_field = array("name"=>"age", "value"=>$patient->age, "content"=>"Age", "readonly"=>"readonly",  "required"=>"", "type"=>"text","class"=>"form-control");
+			$form_fields[] = $form_field;
+			$form_field = array("name"=>"totalamount", "value"=>"", "content"=>"total amount", "readonly"=>"readonly",  "required"=>"", "type"=>"text","class"=>"form-control");
+			$form_fields[] = $form_field;
+			$form_field = array("name"=>"jsondata", "value"=>"", "content"=>"", "readonly"=>"readonly",  "required"=>"", "type"=>"hidden","class"=>"form-control");
+			$form_fields[] = $form_field;
+			$form_field = array("name"=>"type", "value"=>$values["type"], "content"=>"", "readonly"=>"readonly",  "required"=>"", "type"=>"hidden","class"=>"form-control");
 			$form_fields[] = $form_field;
 	
 			$form_info["form_fields"] = $form_fields;
@@ -656,24 +344,56 @@ class BillingController extends \Controller {
 			$form_info["method"] = "post";
 			$form_info["class"] = "form-horizontal";
 			
-			$items = \LabTests::where("status","=","ACTIVE")->get();
-			foreach ($items as $item){
-				$items_arr[$item->id] = $item->name;
+			if($values["type"]=="diagnostics"){
+				$items = \LabTests::where("status","=","ACTIVE")->get();
+				foreach ($items as $item){
+					$items_arr[$item->id] = $item->name;
+				}
+				$form_fields = array();
+				$form_field = array("name"=>"name", "content"=>"test name", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$items_arr, "action"=>array("type"=>"onchange","script"=>"getTestDetails(this.value)"), "class"=>"form-control chosen-select");
+				$form_fields[] = $form_field;
+				$form_field = array("name"=>"code", "content"=>"code", "readonly"=>"readonly", "required"=>"","type"=>"text",  "class"=>"form-control");
+				$form_fields[] = $form_field;
+				$form_field = array("name"=>"description", "content"=>"description", "readonly"=>"readonly", "required"=>"","type"=>"text",  "class"=>"form-control");
+				$form_fields[] = $form_field;
+				$form_field = array("name"=>"amount", "content"=>"amount", "readonly"=>"readonly", "required"=>"required","type"=>"text", "class"=>"form-control");
+				$form_fields[] = $form_field;
+				$form_field = array("name"=>"date", "content"=>"test date", "readonly"=>"", "required"=>"required", "type"=>"text", "class"=>"form-control date-picker");
+				$form_fields[] = $form_field;
+				$form_info["form_fields"] = $form_fields;
+				$modals[] = $form_info;
+				$values["provider"] = "purchasedorder";
+				$values["modals"] = $modals;
+				return View::make('billing.diagnostics', array("values"=>$values));
 			}
-			
-			$form_fields = array();
-			$form_field = array("name"=>"name", "content"=>"test name", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$items_arr, "action"=>array("type"=>"onchange","script"=>"getTestDetails(this.value)"), "class"=>"form-control chosen-select");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"code", "content"=>"code", "readonly"=>"readonly", "required"=>"","type"=>"text",  "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_field = array("name"=>"amount", "content"=>"amount", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control");
-			$form_fields[] = $form_field;
-			$form_info["form_fields"] = $form_fields;
-			$modals[] = $form_info;
-			$values["provider"] = "purchasedorder";
-		
-			$values["modals"] = $modals;
-			return View::make('billing.editpurchaseorder', array("values"=>$values));
+			else if($values["type"]=="pharmacy"){
+				$select_fields = array();
+				$select_fields[] = "items.name as name";
+				$select_fields[] = "purchased_items.qty as qty";
+				$select_fields[] = "purchased_items.batchNo as batchNo";
+				$select_fields[] = "purchased_items.id as id";
+				$stockitems =  \PurchasedOrders::where("purchased_items.status","=","ACTIVE")->where("purchased_items.qty",">",0)->join("purchased_items","purchased_items.purchasedOrderId","=","purchase_orders.id")->join("items","purchased_items.itemId","=","items.id")->select($select_fields)->get();
+				$stockitems_arr = array();
+				foreach ($stockitems as $stockitem){
+					$stockitems_arr[$stockitem['id']] = $stockitem->name." (".$stockitem->qty.", ".$stockitem->batchNo.")";
+				}
+				$form_fields = array();
+				$form_field = array("name"=>"name", "content"=>"drug name", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$stockitems_arr,  "class"=>"form-control chosen-select");
+				$form_fields[] = $form_field;
+				$form_field = array("name"=>"qty", "content"=>"quantity", "readonly"=>"", "required"=>"required", "type"=>"text", "action"=>array("type"=>"onchange","script"=>"getItemInfo(this.value)"), "class"=>"form-control");
+				$form_fields[] = $form_field;
+				$form_field = array("name"=>"batchno", "content"=>"batch no", "readonly"=>"readonly", "required"=>"required", "type"=>"text",  "class"=>"form-control");
+				$form_fields[] = $form_field;
+				$form_field = array("name"=>"expirydate", "content"=>"expiry date", "readonly"=>"", "required"=>"required", "type"=>"text", "class"=>"form-control date-picker");
+				$form_fields[] = $form_field;
+				$form_field = array("name"=>"amount", "content"=>"amount", "readonly"=>"readonly", "required"=>"required","type"=>"text", "class"=>"form-control");
+				$form_fields[] = $form_field;
+				$form_info["form_fields"] = $form_fields;
+				$modals[] = $form_info;
+				$values["provider"] = "purchasedorder";
+				$values["modals"] = $modals;
+				return View::make('billing.pharmacy', array("values"=>$values));
+			}
 		}
 	}
 	
@@ -809,31 +529,13 @@ class BillingController extends \Controller {
 		}
 	}
 	
-	public function getCreditSuppliersByState(){
+	public function getTestDetails(){
 		$values = Input::all();
 		$jsondata = array();
-		$branchId = $values["branchId"];
-		$stateId = 0;
-		$branch = \OfficeBranch::where("id","=",$branchId)->first();
-		$stateId = $branch->stateId;
-		$suppliers = \CreditSupplier::where("stateId","=",$stateId)->where("status","=","ACTIVE")->get();
-		$suppliers_options = "";
-		foreach ($suppliers as $supplier){
-			$suppliers_options = $suppliers_options."<option value='".$supplier->id."' >".$supplier->supplierName."</option>";
-		}
-		$jsondata["suppliers"] = $suppliers_options;
-		
-		$incharges =  \InchargeAccounts::join("employee", "employee.id","=","inchargeaccounts.empid")
-							->join("cities", "cities.id","=","employee.cityId")
-							->where("cities.stateId","=",$stateId)
-							->where("employee.status","=","ACTIVE")
-							->select(array("inchargeaccounts.empid as id","employee.fullName as name"))
-							->groupBy("employee.id")->get();
-		$incharges_options = "";
-		foreach ($incharges as $incharge){
-			$incharges_options = $incharges_options."<option value='".$incharge->id."' >".$incharge->name."</option>";
-		}
-		$jsondata["incharges"] = $incharges_options;
+		$test = \LabTests::where("id","=",$values["id"])->where("status","=","ACTIVE")->first();
+		$jsondata["code"] = $test->code;
+		$jsondata["description"] = $test->description;
+		$jsondata["amount"] = $test->amount;
 		echo json_encode($jsondata);
 	}
 	

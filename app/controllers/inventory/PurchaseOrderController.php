@@ -64,12 +64,14 @@ class PurchaseOrderController extends \Controller {
 				foreach ($jsonitems as $jsonitem){
 					$fields = array();
 					$fields["purchasedOrderId"] = $recid;
-					$fields["itemId"] = $jsonitem->i5;
-					$fields["itemTypeId"] = $jsonitem->i6;
-					$fields["manufacturerId"] = $jsonitem->i7;
-					$fields["qty"] = $jsonitem->i3;
-					$fields["purchasedQty"] = $jsonitem->i3;
-					$fields["unitPrice"] = $jsonitem->i4;
+					$fields["itemId"] = $jsonitem->i7;
+					$fields["itemTypeId"] = $jsonitem->i8;
+					$fields["manufacturerId"] = $jsonitem->i9;
+					$fields["batchNo"] = $jsonitem->i3;
+					$fields["expiryDate"] = date("Y-m-d",strtotime($jsonitem->i4));
+					$fields["qty"] = $jsonitem->i5;
+					$fields["purchasedQty"] = $jsonitem->i5;
+					$fields["unitPrice"] = $jsonitem->i6;
 					$db_functions_ctrl->insert($table, $fields);
 				}				
 			}
@@ -377,14 +379,6 @@ class PurchaseOrderController extends \Controller {
 			}
 		}
 		
-		$incharges =  \InchargeAccounts::leftjoin("employee", "employee.id","=","inchargeaccounts.empid")->where("employee.status","=","ACTIVE")
-									->select(array("inchargeaccounts.empid as id","employee.fullName as name"))->get();
-		$incharges_arr = array();
-		foreach ($incharges as $incharge){
-			$incharges_arr[$incharge->id] = $incharge->name;
-		}
-		
-		
 		$form_field = array("name"=>"creditsupplier", "content"=>"credit supplier", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>$credit_sup_arr, "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"orderdate", "content"=>"order date", "readonly"=>"", "required"=>"required","type"=>"text","action"=>array("type"=>"onchange","script"=>"getendreading()"),  "class"=>"form-control date-picker");
@@ -393,7 +387,7 @@ class PurchaseOrderController extends \Controller {
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"amountpaid", "content"=>"amount paid", "readonly"=>"", "required"=>"required","type"=>"select", "action"=>array("type"=>"onChange","script"=>"enablePaymentType(this.value)"), "options"=>array("Yes"=>"Yes","No"=>"No"), "class"=>"form-control");
 		$form_fields[] = $form_field;
-		$form_field = array("name"=>"paymenttype", "id"=>"paymenttype", "content"=>"payment type", "readonly"=>"", "required"=>"","type"=>"select", "action"=>array("type"=>"onchange","script"=>"showPaymentFields(this.value)"), "options"=>array("cash"=>"CASH","advance"=>"FROM ADVANCE","cheque_debit"=>"CHEQUE (CREDIT)","cheque_credit"=>"CHEQUE (DEBIT)","ecs"=>"ECS","neft"=>"NEFT","rtgs"=>"RTGS","dd"=>"DD","credit_card"=>"CREDIT CARD","debit_card"=>"DEBIT CARD"), "class"=>"form-control");
+		$form_field = array("name"=>"paymenttype", "id"=>"paymenttype", "content"=>"payment type", "readonly"=>"", "required"=>"","type"=>"select",  "options"=>array("cash"=>"CASH","advance"=>"FROM ADVANCE","cheque_debit"=>"CHEQUE (CREDIT)","cheque_credit"=>"CHEQUE (DEBIT)","ecs"=>"ECS","neft"=>"NEFT","rtgs"=>"RTGS","dd"=>"DD","credit_card"=>"CREDIT CARD","debit_card"=>"DEBIT CARD"), "class"=>"form-control");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"paymentdate", "content"=>"payment paid date", "readonly"=>"", "required"=>"", "type"=>"text", "class"=>"form-control date-picker");
 		$form_fields[] = $form_field;
@@ -440,6 +434,10 @@ class PurchaseOrderController extends \Controller {
 		$form_field = array("name"=>"itemtype", "content"=>"drug type", "readonly"=>"", "required"=>"","type"=>"select", "options"=>array(),  "class"=>"form-control chosen-select");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"iteminfo", "content"=>"manufacturer", "readonly"=>"", "required"=>"required","type"=>"select", "options"=>array(),  "class"=>"form-control chosen-select");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"batchno", "content"=>"batch no", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control ");
+		$form_fields[] = $form_field;
+		$form_field = array("name"=>"expirydate", "content"=>"expiry date", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control date-picker");
 		$form_fields[] = $form_field;
 		$form_field = array("name"=>"quantity", "content"=>"quantity", "readonly"=>"", "required"=>"required","type"=>"text", "class"=>"form-control ");
 		$form_fields[] = $form_field;

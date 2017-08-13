@@ -989,6 +989,8 @@ Route::any('/register1', "registrations\OutpatientController@patientRegister");
 
 Route::any('/billing', "billing\BillingController@billing");
 
+Route::any('/gettestdetails', "billing\BillingController@getTestDetails");
+
 Route::get('/getdoctordetails', "registrations\OutpatientController@getDoctorDetails");
 
 Route::get('/getcitiesbystateid', "registrations\OutpatientController@getCitiesbyStateId");

@@ -341,7 +341,14 @@
 							<li class="hover">
 								<a href="billing?type=diagnostics">
 									<i class="menu-icon fa fa-caret-right"></i>
-									OP BILLING
+									DIAGNOSTICS
+								</a>
+							</li>
+							<?php } if(in_array(106, $jobs)){?>
+							<li class="hover">
+								<a href="billing?type=pharmacy">
+									<i class="menu-icon fa fa-caret-right"></i>
+									PHARMACY
 								</a>
 							</li>
 							<?php } if(in_array(106, $jobs)){?>

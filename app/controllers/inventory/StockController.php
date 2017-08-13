@@ -995,54 +995,17 @@ class StockController extends \Controller {
 		$jsondata = array();
 		
 		$select_args = array();
-		$select_args[] = "items.needAlert as needAlert";
-		$select_args[] = "items.itemNumber as itemNumber";
-		$select_args[] = "items.itemActions as itemActions";
-		$select_args[] = "purchased_items.itemNumbers as itemNumbers";
-		$select_args[] = "purchase_orders.filePath as filePath";
+		$select_args[] = "purchased_items.batchNo as batchNo";
+		$select_args[] = "purchased_items.expiryDate as expiryDate";
+		$select_args[] = "purchased_items.unitPrice as unitPrice";
 		$item = \PurchasedItems::where("purchased_items.id","=",$itemid)
 						->where("purchased_items.status","=","ACTIVE")
 						->join("items","items.id","=","purchased_items.itemId")
-						->join("purchase_orders","purchase_orders.id","=","purchased_items.purchasedOrderId")
 						->select($select_args)->first();
 		
-		$jsondata["itemactions"] = "<option value=''>-- select action --</option>";
-		if($item->itemActions != ""){
-			$jsondata["itemactionsstatus"] = "Yes";
-			$itemactions = explode(",", $item->itemActions);
-			$options_data = "<option value=''>-- select action --</option>";
-			$actions = \InventoryLookupValues::wherein("id",$itemactions)->get();
-			foreach ($actions as $action){
-				$options_data = $options_data."<option value='".$action->id."' >".$action->name."</option>";
-			}
-			$jsondata["itemactions"] = $options_data;
-		}
-		$jsondata["filePath"] = $item->filePath;
-		
-		$jsondata["alertstatus"] = "No";
-		if($item->needAlert == "Yes"){
-			$jsondata["alertstatus"] = "Yes";
-		}
-		
-		$jsondata["itemnumberstatus"] = "No";
-		if($item->itemNumber == "Yes"){
-			$jsondata["itemnumberstatus"] = "Yes";
-			$itemnumbers_arr = explode(",", $item->itemNumbers);
-			$options_data = "<option value=''>-- select item number --</option>";
-			foreach ($itemnumbers_arr as $itemnumber){
-				if($itemnumber != ""){
-					$options_data = $options_data."<option value='".$itemnumber."' >".$itemnumber."</option>";
-				}
-			}
-			$jsondata["itemnumbers"] = $options_data;
-		}
-		
-		$select_args = array("inventorylookupvalues.name as unitsOfMeasure");
-		$item = \PurchasedItems::where("purchased_items.id","=",$itemid)
-					->leftjoin("items","items.id","=","purchased_items.itemId")
-					->leftjoin("inventorylookupvalues","inventorylookupvalues.id","=","items.unitsOfMeasure")
-					->select($select_args)->first();
-		$jsondata["units"] = $item->unitsOfMeasure;
+		$jsondata["batchNo"] = $item->batchNo;
+		$jsondata["expiryDate"] = date("d-m-Y",strtotime($item->expiryDate));
+		$jsondata["unitPrice"] = $item->unitPrice;
 		echo json_encode($jsondata);
 	}
 	

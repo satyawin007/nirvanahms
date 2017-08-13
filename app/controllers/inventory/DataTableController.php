@@ -254,13 +254,8 @@ class DataTableController extends \Controller {
 		$select_args[] = "items.name as name";
 		$select_args[] = "items.description as description";
 		$select_args[] = "items.shortName as shortName";
-		$select_args[] = "inventorylookupvalues.name as unitsOfMeasure";
-		$select_args[] = "items.tags as tags";
-		$select_args[] = "items.itemModel as itemModel";
 		$select_args[] = "items.itemTypeId as itemTypeId";
 		$select_args[] = "items.manufactures as manufactures";
-		$select_args[] = "items.stockable as stockable";
-		$select_args[] = "items.expirable as expirable";
 		$select_args[] = "items.status as status";
 		$select_args[] = "items.id as id";
 	
@@ -331,7 +326,7 @@ class DataTableController extends \Controller {
 					$action_data = $action_data."<a class='btn btn-minier btn-".$action["css"]."' href='".$action['url']."&id=".$entity['id']."'>".strtoupper($action["text"])."</a>&nbsp; &nbsp;" ;
 				}
 			}
-			$data_values[11] = $action_data;
+			$data_values[6] = $action_data;
 			$data[] = $data_values;
 		}
 		return array("total"=>$total, "data"=>$data);
